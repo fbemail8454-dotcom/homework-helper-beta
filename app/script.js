@@ -520,22 +520,43 @@ function saveTutorSession() {
     String(today.getMonth() + 1).padStart(2, "0") + "-" +
     String(today.getDate()).padStart(2, "0");
 
-  let content = "NURSING TUTOR SESSION\n";
+  const sep = "====================================";
+
+  let content = sep + "\n";
+  content += "=== NURSING TUTOR SESSION ===\n";
+  content += sep + "\n";
   content += "Date: " + today.toLocaleString() + "\n";
   content += "Level: " + level + "\n";
-  content += "Course: " + course + "\n\n";
-  content += "ORIGINAL QUESTION:\n" + (question || "(none)") + "\n\n";
-  content += "FIRST EXPLANATION:\n" + (first || "(none)") + "\n";
+  content += "Course: " + course + "\n";
+
+  content += "\n" + sep + "\n";
+  content += "=== ORIGINAL QUESTION ===\n";
+  content += sep + "\n";
+  content += (question || "(none)") + "\n";
+
+  content += "\n" + sep + "\n";
+  content += "=== FIRST EXPLANATION ===\n";
+  content += sep + "\n";
+  content += (first || "(none)") + "\n";
 
   if (followUp) {
-    content += "\nFOLLOW-UP EXPLANATION:\n" + followUp + "\n";
+    content += "\n" + sep + "\n";
+    content += "=== FOLLOW-UP EXPLANATION ===\n";
+    content += sep + "\n";
+    content += followUp + "\n";
   }
+
   if (third) {
-    content += "\nSECOND FOLLOW-UP EXPLANATION:\n" + third + "\n";
+    content += "\n" + sep + "\n";
+    content += "=== SECOND FOLLOW-UP EXPLANATION ===\n";
+    content += sep + "\n";
+    content += third + "\n";
   }
 
   if (feedbackLog.length > 0) {
-    content += "\nQUICK FEEDBACK ENTRIES:\n";
+    content += "\n" + sep + "\n";
+    content += "=== QUICK FEEDBACK ===\n";
+    content += sep + "\n";
     feedbackLog.forEach((entry, i) => {
       content += "\nEntry " + (i + 1) + " — " + entry.timestamp + "\n";
       content += "Helpful? " + entry.q1 + "\n";
