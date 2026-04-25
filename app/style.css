@@ -137,6 +137,10 @@ button:hover {
   border-color: #555;
 }
 
+.session-save-row {
+  margin-bottom: 18px;
+}
+
 .mode-header {
   font-size: 13px;
   font-weight: bold;

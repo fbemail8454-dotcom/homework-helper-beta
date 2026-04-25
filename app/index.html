@@ -12,8 +12,11 @@
     <h1>Nursing Tutor (BETA)</h1>
     <p class="subtitle">Ask a question. Get a step-by-step clinical explanation.</p>
 
-    <!-- ── STUDENT MODE ── -->
-    <div class="mode-header">Student Mode</div>
+    <!-- ── TUTOR SESSION ── -->
+    <div class="mode-header">Tutor Session</div>
+    <div class="session-save-row">
+      <button onclick="saveTutorSession()">Save Tutor Session</button>
+    </div>
 
     <section class="card">
       <h2>What's not clicking yet?</h2>
@@ -71,6 +74,12 @@
       <h2>Follow-up explanation</h2>
       <p class="step-note">Your follow-up answer appears here after you ask for a simpler, deeper, or different explanation.</p>
       <textarea id="followUpOutput" placeholder="Follow-up explanation will appear here..." readonly></textarea>
+    </section>
+
+    <section class="card card-followup">
+      <h2>Second follow-up explanation</h2>
+      <p class="step-note">Your second follow-up answer appears here if you ask for another explanation.</p>
+      <textarea id="thirdOutput" placeholder="Second follow-up explanation will appear here..." readonly></textarea>
     </section>
 
     <!-- ── BETA FEEDBACK ── -->

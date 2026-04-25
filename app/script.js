@@ -1,7 +1,7 @@
 let feedbackCount = 0;
 let feedbackLog = [];
 let feedbackSelections = { q1: null, q2: null, q3: null };
-let isFollowUp = false;
+let explanationStep = 0;
 
 function buildTutorPrompt() {
   const level = document.getElementById("level").value;
@@ -255,12 +255,14 @@ If any internal section appears in the output, the answer is invalid and must be
 
 Return ONLY the final explanation.`;
 
-  isFollowUp = false;
+  explanationStep = 0;
   callAI(prompt);
 }
 
 async function callAI(prompt) {
-  const targetId = isFollowUp ? "followUpOutput" : "tutorOutput";
+  const targetId = explanationStep === 0 ? "tutorOutput"
+                 : explanationStep === 1 ? "followUpOutput"
+                 : "thirdOutput";
   const target = document.getElementById(targetId);
   target.value = "Thinking...";
   target.setAttribute("readonly", true);
@@ -297,17 +299,13 @@ function sendToExplanation() {
     return;
   }
   const cleaned = validateOutput(raw);
-  if (isFollowUp) {
-    const followUp = document.getElementById("followUpOutput");
-    followUp.value = cleaned;
-    followUp.removeAttribute("readonly");
-    followUp.scrollIntoView({ behavior: "smooth" });
-  } else {
-    const primary = document.getElementById("tutorOutput");
-    primary.value = cleaned;
-    primary.removeAttribute("readonly");
-    primary.scrollIntoView({ behavior: "smooth" });
-  }
+  const targetId = explanationStep === 0 ? "tutorOutput"
+                 : explanationStep === 1 ? "followUpOutput"
+                 : "thirdOutput";
+  const target = document.getElementById(targetId);
+  target.value = cleaned;
+  target.removeAttribute("readonly");
+  target.scrollIntoView({ behavior: "smooth" });
 }
 
 function copyText(elementId) {
@@ -456,7 +454,7 @@ RULES:
 - Do not give a generic response
 - Keep it focused and clear`;
 
-  isFollowUp = true;
+  explanationStep++;
   feedbackCount++;
   if (feedbackCount >= 4) {
     showLimitModal();
@@ -499,6 +497,59 @@ function downloadSession() {
   const a = document.createElement("a");
   a.href = url;
   a.download = "nursing-tutor-session.txt";
+  a.click();
+  URL.revokeObjectURL(url);
+}
+
+function saveTutorSession() {
+  const question = document.getElementById("studentInput").value.trim();
+  const first = document.getElementById("tutorOutput").value.trim();
+  const followUp = document.getElementById("followUpOutput").value.trim();
+  const third = document.getElementById("thirdOutput").value.trim();
+
+  if (!question && !first) {
+    alert("No tutor session to save yet.");
+    return;
+  }
+
+  const level = document.getElementById("level").value;
+  const course = document.getElementById("course").value;
+
+  const today = new Date();
+  const dateStr = today.getFullYear() + "-" +
+    String(today.getMonth() + 1).padStart(2, "0") + "-" +
+    String(today.getDate()).padStart(2, "0");
+
+  let content = "NURSING TUTOR SESSION\n";
+  content += "Date: " + today.toLocaleString() + "\n";
+  content += "Level: " + level + "\n";
+  content += "Course: " + course + "\n\n";
+  content += "ORIGINAL QUESTION:\n" + (question || "(none)") + "\n\n";
+  content += "FIRST EXPLANATION:\n" + (first || "(none)") + "\n";
+
+  if (followUp) {
+    content += "\nFOLLOW-UP EXPLANATION:\n" + followUp + "\n";
+  }
+  if (third) {
+    content += "\nSECOND FOLLOW-UP EXPLANATION:\n" + third + "\n";
+  }
+
+  if (feedbackLog.length > 0) {
+    content += "\nQUICK FEEDBACK ENTRIES:\n";
+    feedbackLog.forEach((entry, i) => {
+      content += "\nEntry " + (i + 1) + " — " + entry.timestamp + "\n";
+      content += "Helpful? " + entry.q1 + "\n";
+      content += "What would help? " + entry.q2 + "\n";
+      content += "How it felt: " + entry.q3 + "\n";
+      if (entry.comment) content += "Note: " + entry.comment + "\n";
+    });
+  }
+
+  const blob = new Blob([content], { type: "text/plain" });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = "NursingTutor_Session_" + dateStr + ".txt";
   a.click();
   URL.revokeObjectURL(url);
 }
@@ -659,8 +710,9 @@ function resetApp() {
   feedbackCount = 0;
   feedbackLog = [];
   feedbackSelections = { q1: null, q2: null, q3: null };
-  isFollowUp = false;
+  explanationStep = 0;
   document.getElementById("followUpOutput").value = "";
+  document.getElementById("thirdOutput").value = "";
   document.querySelectorAll('.feedback-option-btn').forEach(btn => btn.classList.remove('selected'));
   document.getElementById("feedbackComment").value = "";
   renderFeedbackLog();
