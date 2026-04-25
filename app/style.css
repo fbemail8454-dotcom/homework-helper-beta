@@ -1,0 +1,292 @@
+body {
+  font-family: Arial, sans-serif;
+  background: #f4f6f8;
+  margin: 0;
+  padding: 30px 20px;
+  color: #222;
+}
+
+.container {
+  max-width: 900px;
+  margin: auto;
+}
+
+h1 {
+  font-size: 22px;
+  margin-bottom: 4px;
+}
+
+h2 {
+  font-size: 16px;
+  font-weight: bold;
+  margin: 0 0 6px 0;
+}
+
+.subtitle {
+  color: #555;
+  font-size: 14px;
+  margin-bottom: 28px;
+}
+
+.step-note {
+  color: #555;
+  font-size: 13px;
+  margin: 0 0 12px 0;
+}
+
+.card {
+  background: white;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  padding: 22px;
+  margin-bottom: 28px;
+}
+
+label {
+  display: block;
+  font-weight: bold;
+  font-size: 14px;
+  margin-top: 14px;
+  margin-bottom: 4px;
+}
+
+select {
+  width: 100%;
+  padding: 9px 10px;
+  font-size: 14px;
+  box-sizing: border-box;
+  border: 1px solid #ccc;
+  border-radius: 3px;
+}
+
+textarea {
+  width: 100%;
+  min-height: 180px;
+  padding: 12px;
+  font-size: 14px;
+  font-family: Arial, sans-serif;
+  box-sizing: border-box;
+  border: 1px solid #ccc;
+  border-radius: 3px;
+  resize: vertical;
+  line-height: 1.5;
+}
+
+button {
+  margin-top: 12px;
+  padding: 10px 18px;
+  font-size: 14px;
+  cursor: pointer;
+  border: 1px solid #888;
+  border-radius: 3px;
+  background: #f0f0f0;
+}
+
+button:hover {
+  background: #e0e0e0;
+}
+
+.button-row {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  margin-top: 12px;
+}
+
+.reset-btn {
+  background: #fff;
+  color: #c0392b;
+  border: 1px solid #c0392b;
+}
+
+.reset-btn:hover {
+  background: #c0392b;
+  color: #fff;
+}
+
+.reset-row {
+  text-align: center;
+  padding: 20px 0 30px 0;
+}
+
+.feedback-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 4px;
+}
+
+.feedback-btn {
+  margin-top: 0;
+  padding: 9px 14px;
+  font-size: 13px;
+  background: #fff;
+  border: 1px solid #999;
+  border-radius: 3px;
+  cursor: pointer;
+}
+
+.feedback-btn:hover {
+  background: #eef2ff;
+  border-color: #555;
+}
+
+.mode-header {
+  font-size: 13px;
+  font-weight: bold;
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+  color: #333;
+  border-top: 2px solid #333;
+  padding-top: 10px;
+  margin-bottom: 18px;
+  margin-top: 10px;
+}
+
+.dev-toggle-row {
+  text-align: center;
+  margin: 20px 0 10px 0;
+}
+
+.dev-toggle-row button {
+  font-size: 12px;
+  color: #888;
+  background: none;
+  border: 1px solid #ccc;
+  padding: 6px 14px;
+  border-radius: 3px;
+  cursor: pointer;
+  margin-top: 0;
+}
+
+.dev-toggle-row button:hover {
+  color: #444;
+  border-color: #888;
+  background: none;
+}
+
+.dev-header {
+  color: #888;
+  border-top-color: #aaa;
+  margin-top: 48px;
+}
+
+.dev-section {
+  background: #f0f0f0;
+  border: 1px dashed #aaa;
+  font-size: 13px;
+}
+
+.dev-label {
+  font-size: 13px;
+  color: #888;
+  font-weight: bold;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin-bottom: 6px;
+}
+
+#limitModal {
+  display: none;
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 1000;
+}
+
+.modal-overlay {
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.modal-card {
+  background: white;
+  border-radius: 4px;
+  padding: 32px;
+  max-width: 420px;
+  width: 90%;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+}
+
+.modal-message {
+  font-size: 15px;
+  color: #222;
+  margin: 0 0 24px 0;
+  line-height: 1.5;
+}
+
+.modal-buttons {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.modal-buttons button {
+  margin-top: 0;
+  width: 100%;
+}
+
+.card-followup {
+  margin-top: 8px;
+  border-left: 3px solid #4455aa;
+  background: #f8f8ff;
+}
+
+.feedback-panel-question {
+  font-weight: bold;
+  font-size: 14px;
+  margin: 16px 0 8px 0;
+  color: #222;
+}
+
+.feedback-option-group {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.feedback-option-btn {
+  margin-top: 0;
+  padding: 7px 14px;
+  font-size: 13px;
+  background: #fff;
+  border: 1px solid #bbb;
+  border-radius: 20px;
+  cursor: pointer;
+}
+
+.feedback-option-btn:hover {
+  background: #f0f0f0;
+}
+
+.feedback-option-btn.selected {
+  background: #eef2ff;
+  border-color: #4455aa;
+  color: #4455aa;
+  font-weight: bold;
+}
+
+.feedback-log {
+  margin-top: 20px;
+}
+
+.feedback-log-entry {
+  background: #f8f8f8;
+  border-top: 1px solid #ddd;
+  padding: 10px 12px;
+  font-size: 13px;
+  line-height: 1.6;
+  margin-top: 10px;
+}
+
+.feedback-log-time {
+  font-size: 11px;
+  color: #888;
+  margin-bottom: 4px;
+}

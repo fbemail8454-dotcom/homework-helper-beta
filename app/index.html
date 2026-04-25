@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Nursing Tutor</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <main class="container">
+
+    <h1>Nursing Tutor (BETA)</h1>
+    <p class="subtitle">Ask a question. Get a step-by-step clinical explanation.</p>
+
+    <!-- ── STUDENT MODE ── -->
+    <div class="mode-header">Student Mode</div>
+
+    <section class="card">
+      <h2>What's not clicking yet?</h2>
+      <p class="step-note">Tell me what you're having trouble understanding.</p>
+
+      <label>Nursing Level</label>
+      <select id="level">
+        <option>1st Year</option>
+        <option>2nd Year</option>
+        <option>3rd Year</option>
+        <option>LPN</option>
+        <option>RN</option>
+      </select>
+
+      <label>Course</label>
+      <select id="course">
+        <option>Fundamentals</option>
+        <option>Med-Surg</option>
+        <option>Pharmacology</option>
+        <option>Pathophysiology</option>
+        <option>OB</option>
+        <option>Psych</option>
+      </select>
+
+      <label>Your question</label>
+      <textarea id="studentInput" placeholder="Example: I don't understand why nurses check potassium before giving Lasix."></textarea>
+
+      <button onclick="buildTutorPrompt()">Help Me Understand</button>
+    </section>
+
+    <section class="card">
+      <h2>First explanation</h2>
+      <p class="step-note">This is your first explanation. If it still does not click, choose a follow-up option below.</p>
+      <textarea id="tutorOutput" placeholder="Explanation will appear here..." readonly></textarea>
+    </section>
+
+    <section class="card">
+      <h2>Did that help, or should we try a different way?</h2>
+      <p class="step-note">Pick one option below to ask for a different style of explanation.</p>
+
+      <div class="feedback-grid">
+        <button class="feedback-btn" onclick="buildFeedbackPrompt('understand')">I understand now</button>
+        <button class="feedback-btn" onclick="buildFeedbackPrompt('confused')">I'm still not getting it</button>
+        <button class="feedback-btn" onclick="buildFeedbackPrompt('too_technical')">Can you make that simpler?</button>
+        <button class="feedback-btn" onclick="buildFeedbackPrompt('not_technical')">Not technical enough</button>
+        <button class="feedback-btn" onclick="buildFeedbackPrompt('missed')">Missed my question</button>
+        <button class="feedback-btn" onclick="buildFeedbackPrompt('example')">Show me a real patient example</button>
+        <button class="feedback-btn" onclick="buildFeedbackPrompt('step_by_step')">Walk me through it step by step</button>
+        <button class="feedback-btn" onclick="buildFeedbackPrompt('theory')">Explain the why behind it</button>
+        <button class="feedback-btn" onclick="buildFeedbackPrompt('practice')">Give me a practice question</button>
+      </div>
+    </section>
+
+    <section class="card card-followup">
+      <h2>Follow-up explanation</h2>
+      <p class="step-note">Your follow-up answer appears here after you ask for a simpler, deeper, or different explanation.</p>
+      <textarea id="followUpOutput" placeholder="Follow-up explanation will appear here..." readonly></textarea>
+    </section>
+
+    <!-- ── BETA FEEDBACK ── -->
+    <section class="card">
+      <h2>Quick feedback</h2>
+
+      <p class="feedback-panel-question">Did this actually help you understand it?</p>
+      <div class="feedback-option-group" id="q1-group">
+        <button class="feedback-option-btn" onclick="selectFeedback('q1', 'Yes', this)">Yes</button>
+        <button class="feedback-option-btn" onclick="selectFeedback('q1', 'A little', this)">A little</button>
+        <button class="feedback-option-btn" onclick="selectFeedback('q1', 'No', this)">No</button>
+      </div>
+
+      <p class="feedback-panel-question">What would help more?</p>
+      <div class="feedback-option-group" id="q2-group">
+        <button class="feedback-option-btn" onclick="selectFeedback('q2', 'Simpler explanation', this)">Simpler explanation</button>
+        <button class="feedback-option-btn" onclick="selectFeedback('q2', 'Real-life example', this)">Real-life example</button>
+        <button class="feedback-option-btn" onclick="selectFeedback('q2', 'Step-by-step breakdown', this)">Step-by-step breakdown</button>
+      </div>
+
+      <p class="feedback-panel-question">How did this feel?</p>
+      <div class="feedback-option-group" id="q3-group">
+        <button class="feedback-option-btn" onclick="selectFeedback('q3', 'Easy to follow', this)">Easy to follow</button>
+        <button class="feedback-option-btn" onclick="selectFeedback('q3', 'A bit confusing', this)">A bit confusing</button>
+        <button class="feedback-option-btn" onclick="selectFeedback('q3', 'Overwhelming', this)">Overwhelming</button>
+      </div>
+
+      <label style="margin-top:16px;">Anything you wish was different?</label>
+      <textarea id="feedbackComment" placeholder="Optional..."></textarea>
+
+      <button onclick="saveFeedback()">Save Feedback</button>
+      <button onclick="downloadFeedback()">Download Feedback</button>
+
+      <div id="feedbackLog" class="feedback-log"></div>
+    </section>
+
+    <div class="reset-row">
+      <button class="reset-btn" onclick="resetApp()">Start Over</button>
+    </div>
+
+    <div class="dev-toggle-row">
+      <button id="devToggleBtn" onclick="toggleDevMode()">Show Developer Mode</button>
+    </div>
+
+    <div id="devModeContainer" style="display:none">
+
+      <!-- ── DEVELOPER MODE ── -->
+      <div class="mode-header dev-header" id="devMode">Developer Mode — Manual AI Bridge</div>
+      <p class="step-note">This section is used during beta testing to move the tutor request into Claude and bring the answer back. Future versions will hide this section.</p>
+
+      <section class="card dev-section">
+        <p class="step-note">Copy the request below into your tutor (Claude), then paste the tutor's answer back here. Click to generate the request first.</p>
+        <button onclick="buildTutorPrompt()">Prepare Tutor Request</button>
+      </section>
+
+      <section class="card dev-section">
+        <h2 class="dev-label">B. Tutor Request</h2>
+        <p class="step-note">Copy this and paste it into Claude.</p>
+        <textarea id="tutorRequest" placeholder="Click Prepare Tutor Request above to build the prompt..."></textarea>
+        <button onclick="copyText('tutorRequest')">Copy Request</button>
+      </section>
+
+      <section class="card dev-section">
+        <h2 class="dev-label">C. Paste Claude's Answer Here</h2>
+        <p class="step-note">Paste the full response from Claude into this box.</p>
+        <textarea id="claudeAnswer" placeholder="Paste Claude's response here..."></textarea>
+      </section>
+
+      <section class="card dev-section">
+        <p class="step-note">D. Click to validate and send the cleaned answer to Step 2 above.</p>
+        <button onclick="sendToExplanation()">Validate &amp; Show Explanation</button>
+      </section>
+
+    </div>
+
+  </main>
+
+  <div id="limitModal"></div>
+  <script src="script.js"></script>
+</body>
+</html>
