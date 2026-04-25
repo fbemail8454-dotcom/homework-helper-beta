@@ -137,8 +137,43 @@ button:hover {
   border-color: #555;
 }
 
-.session-save-row {
+.session-header-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-top: 2px solid #333;
+  padding-top: 10px;
   margin-bottom: 18px;
+}
+
+.session-header-row .mode-header {
+  border-top: none;
+  padding-top: 0;
+  margin-top: 0;
+  margin-bottom: 0;
+}
+
+.session-save-group {
+  text-align: right;
+}
+
+.session-save-reminder {
+  font-size: 12px;
+  color: #888;
+  font-style: italic;
+  margin: 0 0 6px 0;
+}
+
+.session-save-group button {
+  background: #c0550a;
+  color: #fff;
+  font-weight: bold;
+  border: none;
+  margin-top: 0;
+}
+
+.session-save-group button:hover {
+  background: #a0440a;
 }
 
 .mode-header {
@@ -317,5 +352,16 @@ button:hover {
   .feedback-btn {
     width: 100%;
     padding: 12px 14px;
+  }
+
+  .session-header-row {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 10px;
+  }
+
+  .session-save-group {
+    text-align: left;
+    width: 100%;
   }
 }
