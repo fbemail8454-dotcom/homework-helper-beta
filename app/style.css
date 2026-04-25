@@ -1,13 +1,19 @@
+* {
+  box-sizing: border-box;
+}
+
 body {
   font-family: Arial, sans-serif;
   background: #f4f6f8;
   margin: 0;
-  padding: 30px 20px;
+  padding: 20px 16px;
   color: #222;
+  font-size: 16px;
+  line-height: 1.6;
 }
 
 .container {
-  max-width: 900px;
+  max-width: 600px;
   margin: auto;
 }
 
@@ -53,7 +59,7 @@ label {
 select {
   width: 100%;
   padding: 9px 10px;
-  font-size: 14px;
+  font-size: 16px;
   box-sizing: border-box;
   border: 1px solid #ccc;
   border-radius: 3px;
@@ -62,19 +68,19 @@ select {
 textarea {
   width: 100%;
   min-height: 180px;
-  padding: 12px;
-  font-size: 14px;
+  padding: 14px;
+  font-size: 16px;
   font-family: Arial, sans-serif;
   box-sizing: border-box;
   border: 1px solid #ccc;
   border-radius: 3px;
   resize: vertical;
-  line-height: 1.5;
+  line-height: 1.6;
 }
 
 button {
   margin-top: 12px;
-  padding: 10px 18px;
+  padding: 12px 18px;
   font-size: 14px;
   cursor: pointer;
   border: 1px solid #888;
@@ -289,4 +295,23 @@ button:hover {
   font-size: 11px;
   color: #888;
   margin-bottom: 4px;
+}
+
+@media (max-width: 600px) {
+  .card {
+    padding: 14px;
+  }
+
+  button {
+    width: 100%;
+  }
+
+  .feedback-grid {
+    flex-direction: column;
+  }
+
+  .feedback-btn {
+    width: 100%;
+    padding: 12px 14px;
+  }
 }
