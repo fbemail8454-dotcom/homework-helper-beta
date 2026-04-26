@@ -183,6 +183,15 @@ NUMERIC USE RULE:
 
 You MAY use numeric values in the student-facing output for teaching purposes.
 
+MEDICATION CALCULATION EXCEPTION — MANDATORY:
+If the question involves medication math (dose calculation, concentration, mL to draw up, unit conversion):
+- You MUST show ALL numbers exactly as given or calculated
+- You MUST show the formula and each step with real numeric values
+- You MUST state the final answer as a specific number with unit (e.g., "25 mL")
+- Do NOT replace any value with a vague placeholder or generalized phrase
+- Numeric values in a calculation are educational facts, not clinical directives
+
+For all other questions:
 Do NOT present any number as a clinical directive — do not state thresholds as universal rules the student should act on without a provider order (e.g., "hold if K+ < 3.5").
 
 If you introduce a reference range as context, note that exact parameters vary by institution.
@@ -231,6 +240,11 @@ Prohibited phrasing:
 - "Do not give"
 - "Administer X immediately"
 - Any instruction phrased as a direct order to the student
+
+EXCEPTION — Medication calculations:
+This rule does NOT apply to medication math explanations.
+When walking through a calculation, stating "draw up 25 mL" or "the answer is 500 mg" is an educational fact, not a clinical directive.
+Never substitute a vague placeholder for a numeric value in a calculation.
 
 Instead, frame all actions as clinical reasoning:
 - "This would raise concern and prompt the nurse to assess further"
@@ -368,26 +382,17 @@ function validateOutput(text) {
 }
 
 function scrubNumbers(text) {
-  // Guard: blood glucose < 70 mg/dL must be labeled hypoglycemia, never "normal"
-  // Document-level check: if this text discusses glucose at all, activate the guard.
-  // Claude always uses "glucose", "blood sugar", "hypoglycemia", or "BG" in topic explanations.
-  const isGlucoseContext = /glucose|blood sugar|\bhypoglycemi|\bbg\b/i.test(text);
-  if (isGlucoseContext) {
-    text = text.replace(/\b(\d+(?:\.\d+)?)\s*mg\/dL\b/gi, (match, numStr, offset, original) => {
-      if (parseFloat(numStr) < 70) {
-        // Exclusion: don't flag values that are clearly a non-glucose lab nearby
-        const nearby = original.slice(Math.max(0, offset - 40), offset + match.length + 30).toLowerCase();
-        if (/\bbun\b|creatinine|urea|cholesterol|bilirubin/.test(nearby)) return match;
-        return `${match}, which is low blood glucose (hypoglycemia)`;
-      }
-      return match;
-    });
-  }
+  // Guard: blood glucose < 70 mg/dL labeled hypoglycemia only when glucose keywords appear nearby
+  text = text.replace(/\b(\d+(?:\.\d+)?)\s*mg\/dL\b/gi, (match, numStr, offset, original) => {
+    if (parseFloat(numStr) < 70) {
+      const nearby = original.slice(Math.max(0, offset - 120), offset + match.length + 120).toLowerCase();
+      if (!/glucose|blood sugar|\bbg\b|glycemi/.test(nearby)) return match;
+      if (/\bbun\b|creatinine|urea|cholesterol|bilirubin/.test(nearby)) return match;
+      return `${match}, which is low blood glucose (hypoglycemia)`;
+    }
+    return match;
+  });
 
-  // Comparison thresholds: < 3.5, > 5.0
-  text = text.replace(/[<>≤≥]\s*\d+\.?\d*\s*(?:mEq\/[Ll]|mg\/d[Ll]|mmol\/[Ll]|g\/d[Ll])?\b/g, 'outside the safe range');
-  // Dose numbers: 40 mg, 20 mcg
-  text = text.replace(/\b\d+\s*(?:mg(?!\/)|mcg|g(?!\/)|mL|units?)\b/gi, 'the ordered dose');
   return text;
 }
 
