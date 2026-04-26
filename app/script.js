@@ -200,6 +200,19 @@ If any accuracy check fails, correct it before continuing.
 
 ---
 
+MEDICATION OUTPUT HARD RULE:
+
+In any medication calculation:
+- You MUST use exact numeric values (e.g., 1 g, 2 g, 50 mL)
+- You MUST NOT use any placeholder or generalized phrase
+- You MUST show numbers exactly as given and calculated
+- Final answer MUST be a number with unit
+
+FAIL CONDITION:
+If any numeric value is replaced with a word or phrase, the answer is incorrect.
+
+---
+
 STUDENT-FACING OUTPUT (AFTER ALL ABOVE):
 
 1. Restated Confusion
