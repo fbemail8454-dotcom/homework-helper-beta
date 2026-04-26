@@ -378,7 +378,7 @@ function scrubNumbers(text) {
         // Exclusion: don't flag values that are clearly a non-glucose lab nearby
         const nearby = original.slice(Math.max(0, offset - 40), offset + match.length + 30).toLowerCase();
         if (/\bbun\b|creatinine|urea|cholesterol|bilirubin/.test(nearby)) return match;
-        return 'low blood glucose (hypoglycemia)';
+        return `${match}, which is low blood glucose (hypoglycemia)`;
       }
       return match;
     });
