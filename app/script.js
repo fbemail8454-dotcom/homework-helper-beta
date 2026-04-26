@@ -2,6 +2,7 @@ let feedbackCount = 0;
 let feedbackLog = [];
 let feedbackSelections = { q1: null, q2: null, q3: null };
 let explanationStep = 0;
+let rawTutorOutput = '';
 
 function buildTutorPrompt() {
   const level = document.getElementById("level").value;
@@ -13,7 +14,59 @@ function buildTutorPrompt() {
     return;
   }
 
-  const prompt = `ROLE:
+  const prompt = `CRITICAL OUTPUT RULE — HIGHEST PRIORITY:
+
+If the user includes ANY numeric clinical value (e.g., 65 mg/dL, 70 mg/dL, 18 mg/dL, 3.1 mEq/L):
+
+1. You MUST repeat that exact value in your response.
+2. You MUST include the number + unit exactly as written.
+3. You MUST use the value in your explanation.
+
+You are NOT allowed to replace it with:
+- "within the normal range"
+- "slightly low"
+- "a typical value"
+- "a normal level"
+- any generalized phrase
+
+If you fail to include the number, the response is incorrect.
+
+This rule overrides ALL other formatting, teaching, or safety rules.
+
+---
+
+VALUE EXTRACTION STEP — REQUIRED:
+
+Before writing the answer:
+
+1. Identify every numeric clinical value in the student's question.
+   Examples:
+   - 65 mg/dL
+   - 18 mg/dL
+   - 3.1 mEq/L
+
+2. Treat those extracted values as protected scenario facts.
+
+3. In the response, repeat each extracted value exactly as written at least once.
+
+4. Use each extracted value in the clinical reasoning.
+
+5. After each value has been stated clearly once, you may use plain language such as "this value" or "this level" to avoid making the explanation feel like a math problem.
+
+FORBIDDEN:
+Do NOT replace extracted values with:
+- "within the normal range"
+- "slightly low"
+- "a typical value"
+- "a normal level"
+- any vague phrase that hides the number
+
+FAIL CONDITION:
+If any student-provided numeric value is missing from the response, the answer is incomplete.
+
+---
+
+ROLE:
 You are a clinical reasoning tutor for nursing students.
 
 Your job is to teach HOW to think through a clinical situation step-by-step using specific clinical details.
@@ -128,21 +181,11 @@ Verify each of the following before writing the student-facing output:
 
 NUMERIC USE RULE:
 
-Numeric values ARE allowed in the student-facing output when used for teaching purposes, such as:
-- Explaining a concept the student must learn (e.g., a typical lab range, a standard dose range, a unit of measurement)
-- Illustrating a relationship or calculation as a teaching example
+You MAY use numeric values in the student-facing output for teaching purposes.
 
-Numeric values are NOT allowed when presented as:
-- Clinical directives (e.g., "hold if K+ < 3.5" stated as a universal rule)
-- Facility-specific thresholds or provider-dependent cutoffs stated as absolute facts
+Do NOT present any number as a clinical directive — do not state thresholds as universal rules the student should act on without a provider order (e.g., "hold if K+ < 3.5").
 
-When numeric values are used in the student-facing output:
-- Label them clearly as examples or typical ranges (e.g., "for example," "a typical range is," "as a teaching reference")
-- Do NOT present them as rules the student should apply independently without a provider order
-- Follow any numeric teaching example with: "Verify exact parameters with your course material, instructor, or provider order."
-
-If you are uncertain about any item above, you MUST include this statement in the student-facing output at the end of the relevant section:
-"Verify this with your course material, instructor, or a drug reference."
+If you introduce a reference range as context, note that exact parameters vary by institution.
 
 If any accuracy check fails, correct it before continuing.
 
@@ -282,7 +325,8 @@ async function callAI(prompt) {
       return;
     }
 
-    const cleaned = validateOutput(data.text || '');
+    rawTutorOutput = data.text || '';
+    const cleaned = validateOutput(rawTutorOutput);
     target.value = cleaned;
     target.removeAttribute("readonly");
     target.scrollIntoView({ behavior: "smooth" });
@@ -324,22 +368,32 @@ function validateOutput(text) {
 }
 
 function scrubNumbers(text) {
-  // Ranges: 3.5–5.0 mEq/L or 3.5-5.0
-  text = text.replace(/\b\d+\.?\d*\s*[–\-]\s*\d+\.?\d*\s*(?:mEq\/[Ll]|mg\/d[Ll]|mmol\/[Ll]|g\/d[Ll]|mcg|mg|mm\s?Hg)?\b/g, 'within the normal range');
+  // Guard: blood glucose < 70 mg/dL must be labeled hypoglycemia, never "normal"
+  // Document-level check: if this text discusses glucose at all, activate the guard.
+  // Claude always uses "glucose", "blood sugar", "hypoglycemia", or "BG" in topic explanations.
+  const isGlucoseContext = /glucose|blood sugar|\bhypoglycemi|\bbg\b/i.test(text);
+  if (isGlucoseContext) {
+    text = text.replace(/\b(\d+(?:\.\d+)?)\s*mg\/dL\b/gi, (match, numStr, offset, original) => {
+      if (parseFloat(numStr) < 70) {
+        // Exclusion: don't flag values that are clearly a non-glucose lab nearby
+        const nearby = original.slice(Math.max(0, offset - 40), offset + match.length + 30).toLowerCase();
+        if (/\bbun\b|creatinine|urea|cholesterol|bilirubin/.test(nearby)) return match;
+        return 'low blood glucose (hypoglycemia)';
+      }
+      return match;
+    });
+  }
+
   // Comparison thresholds: < 3.5, > 5.0
   text = text.replace(/[<>≤≥]\s*\d+\.?\d*\s*(?:mEq\/[Ll]|mg\/d[Ll]|mmol\/[Ll]|g\/d[Ll])?\b/g, 'outside the safe range');
-  // Numbers with clinical units: 3.5 mEq/L
-  text = text.replace(/\b\d+\.?\d*\s*(?:mEq\/[Ll]|mg\/d[Ll]|mmol\/[Ll]|g\/d[Ll]|mcg\/[Ll])\b/g, 'within the normal range');
-  // Standalone decimals: 3.5, 5.0
-  text = text.replace(/\b\d+\.\d+\b/g, 'within the normal range');
   // Dose numbers: 40 mg, 20 mcg
-  text = text.replace(/\b\d+\s*(?:mg|mcg|g|mL|units?)\b/gi, 'the ordered dose');
+  text = text.replace(/\b\d+\s*(?:mg(?!\/)|mcg|g(?!\/)|mL|units?)\b/gi, 'the ordered dose');
   return text;
 }
 
 function buildFeedbackPrompt(feedbackType) {
   const studentInput = document.getElementById("studentInput").value.trim();
-  const explanation = document.getElementById("tutorOutput").value.trim();
+  const explanation = rawTutorOutput.trim() || document.getElementById("tutorOutput").value.trim();
   const level = document.getElementById("level").value;
   const course = document.getElementById("course").value;
 
@@ -732,6 +786,7 @@ function resetApp() {
   feedbackLog = [];
   feedbackSelections = { q1: null, q2: null, q3: null };
   explanationStep = 0;
+  rawTutorOutput = '';
   document.getElementById("followUpOutput").value = "";
   document.getElementById("thirdOutput").value = "";
   document.querySelectorAll('.feedback-option-btn').forEach(btn => btn.classList.remove('selected'));
