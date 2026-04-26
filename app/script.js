@@ -480,6 +480,27 @@ function scrubNumbers(text) {
   return text;
 }
 
+function saveExplanation(sourceId, btn) {
+  const text = document.getElementById(sourceId).value.trim();
+  if (!text) return;
+
+  const today = new Date();
+  const dateStr = today.getFullYear() + "-" +
+    String(today.getMonth() + 1).padStart(2, "0") + "-" +
+    String(today.getDate()).padStart(2, "0");
+
+  const blob = new Blob([text], { type: "text/plain" });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = "nursing-tutor-explanation-" + dateStr + ".txt";
+  a.click();
+  URL.revokeObjectURL(url);
+
+  btn.textContent = '✓ Saved';
+  btn.classList.add('saved');
+}
+
 function buildFeedbackPrompt(feedbackType) {
   const studentInput = document.getElementById("studentInput").value.trim();
   const explanation = rawTutorOutput.trim() || document.getElementById("tutorOutput").value.trim();
@@ -880,6 +901,10 @@ function resetApp() {
   document.getElementById("thirdOutput").value = "";
   document.querySelectorAll('.feedback-option-btn').forEach(btn => btn.classList.remove('selected'));
   document.getElementById("feedbackComment").value = "";
+  ['tutorOutput', 'followUpOutput', 'thirdOutput'].forEach(id => {
+    const btn = document.getElementById('saveBtn_' + id);
+    if (btn) { btn.textContent = '⭐ Save Explanation'; btn.classList.remove('saved'); }
+  });
   renderFeedbackLog();
   window.scrollTo({ top: 0, behavior: "smooth" });
 }

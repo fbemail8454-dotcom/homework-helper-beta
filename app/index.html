@@ -54,6 +54,9 @@
       <h2>First explanation</h2>
       <p class="step-note">This is your first explanation. If it still does not click, choose a follow-up option below.</p>
       <textarea id="tutorOutput" placeholder="Explanation will appear here..." readonly></textarea>
+      <div class="save-btn-row">
+        <button class="save-explanation-btn" id="saveBtn_tutorOutput" onclick="saveExplanation('tutorOutput', this)">⭐ Save Explanation</button>
+      </div>
     </section>
 
     <section class="card">
@@ -77,12 +80,18 @@
       <h2>Follow-up explanation</h2>
       <p class="step-note">Your follow-up answer appears here after you ask for a simpler, deeper, or different explanation.</p>
       <textarea id="followUpOutput" placeholder="Follow-up explanation will appear here..." readonly></textarea>
+      <div class="save-btn-row">
+        <button class="save-explanation-btn" id="saveBtn_followUpOutput" onclick="saveExplanation('followUpOutput', this)">⭐ Save Explanation</button>
+      </div>
     </section>
 
     <section class="card card-followup">
       <h2>Second follow-up explanation</h2>
       <p class="step-note">Your second follow-up answer appears here if you ask for another explanation.</p>
       <textarea id="thirdOutput" placeholder="Second follow-up explanation will appear here..." readonly></textarea>
+      <div class="save-btn-row">
+        <button class="save-explanation-btn" id="saveBtn_thirdOutput" onclick="saveExplanation('thirdOutput', this)">⭐ Save Explanation</button>
+      </div>
     </section>
 
     <!-- ── BETA FEEDBACK ── -->

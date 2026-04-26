@@ -336,6 +336,32 @@ button:hover {
   margin-bottom: 4px;
 }
 
+.save-btn-row {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 8px;
+}
+
+.save-explanation-btn {
+  font-size: 13px;
+  padding: 6px 14px;
+  background: #fff;
+  border: 1px solid #bbb;
+  border-radius: 3px;
+  cursor: pointer;
+  margin-top: 0;
+}
+
+.save-explanation-btn:hover {
+  background: #f0f0f0;
+}
+
+.save-explanation-btn.saved {
+  color: #2a7a2a;
+  border-color: #2a7a2a;
+  background: #fff;
+}
+
 @media (max-width: 600px) {
   .card {
     padding: 14px;
