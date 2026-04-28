@@ -484,16 +484,24 @@ function saveExplanation(sourceId, btn) {
   const text = document.getElementById(sourceId).value.trim();
   if (!text) return;
 
+  const labelMap = { tutorOutput: "initial", followUpOutput: "followup", thirdOutput: "extended" };
+  const label = labelMap[sourceId] || "explanation";
+
   const today = new Date();
   const dateStr = today.getFullYear() + "-" +
     String(today.getMonth() + 1).padStart(2, "0") + "-" +
     String(today.getDate()).padStart(2, "0");
+  const timeStr = String(today.getHours()).padStart(2, "0") +
+    String(today.getMinutes()).padStart(2, "0") +
+    String(today.getSeconds()).padStart(2, "0");
+
+  const uid = Math.random().toString(36).slice(2, 6);
 
   const blob = new Blob([text], { type: "text/plain" });
   const url = URL.createObjectURL(blob);
   const a = document.createElement("a");
   a.href = url;
-  a.download = "nursing-tutor-explanation-" + dateStr + ".txt";
+  a.download = "nursing-tutor-" + label + "-" + dateStr + "-" + timeStr + "-" + uid + ".txt";
   a.click();
   URL.revokeObjectURL(url);
 
