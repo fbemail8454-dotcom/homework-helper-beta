@@ -15,7 +15,7 @@
       <div class="mode-header">Tutor Session</div>
       <div class="session-save-group">
         <p class="session-save-reminder">Before you leave, save this session</p>
-        <button onclick="saveTutorSession()">Save Homework Helper Session</button>
+        <button onclick="saveTutorSession()">Download Session</button>
       </div>
     </div>
 
@@ -84,7 +84,7 @@
       <p class="step-note">Your parent guide or student practice appears here.</p>
       <textarea id="tutorOutput" placeholder="Homework Helper response will appear here..." readonly></textarea>
       <div class="save-btn-row">
-        <button class="save-explanation-btn" id="saveBtn_tutorOutput" onclick="saveExplanation('tutorOutput', this)">Save Response</button>
+        <button class="save-explanation-btn" id="saveBtn_tutorOutput" onclick="saveExplanation('tutorOutput', this)">Download Response</button>
       </div>
     </section>
 
@@ -105,12 +105,13 @@
       <p class="step-note">The adjusted response appears here.</p>
       <textarea id="followUpOutput" placeholder="Follow-up response will appear here..." readonly></textarea>
       <div class="save-btn-row">
-        <button class="save-explanation-btn" id="saveBtn_followUpOutput" onclick="saveExplanation('followUpOutput', this)">Save Response</button>
+        <button class="save-explanation-btn" id="saveBtn_followUpOutput" onclick="saveExplanation('followUpOutput', this)">Download Response</button>
       </div>
     </section>
 
     <section class="card">
       <h2>Quick feedback</h2>
+      <p class="step-note">Feedback helps improve this beta. Please don't include private personal information.</p>
 
       <p class="feedback-panel-question">Did this help with the homework?</p>
       <div class="feedback-option-group" id="q1-group">
@@ -137,7 +138,7 @@
       <textarea id="feedbackComment" class="short-textarea" placeholder="Optional..."></textarea>
 
       <button onclick="saveFeedback()">Save Feedback</button>
-      <button onclick="downloadFeedback()">Download Feedback</button>
+      <button onclick="downloadFeedback()">Download This Page Feedback</button>
 
       <div id="feedbackLog" class="feedback-log"></div>
     </section>
