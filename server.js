@@ -21,6 +21,31 @@ function cleanField(value) {
   return typeof value === 'string' ? value.trim() : '';
 }
 
+function normalizeHomeworkText(text) {
+  if (!text) return text;
+
+  // Trim
+  let cleaned = text.trim();
+
+  // Detect "broken math" pattern:
+  // many short lines (1-3 characters)
+  const lines = cleaned.split('\n');
+  const shortLines = lines.filter(l => l.trim().length > 0 && l.trim().length <= 3);
+
+  const isLikelyBrokenMath =
+    lines.length > 6 && shortLines.length / lines.length > 0.6;
+
+  if (isLikelyBrokenMath) {
+    // Join everything into one line
+    cleaned = lines.map(l => l.trim()).join(' ');
+
+    // Collapse extra spaces
+    cleaned = cleaned.replace(/\s+/g, ' ');
+  }
+
+  return cleaned;
+}
+
 function normalizeMode(mode) {
   return mode === 'kid-practice' ? 'kid-practice' : 'parent-guide';
 }
@@ -33,7 +58,7 @@ function getTutorRequest(body) {
     childName: cleanField(body.childName),
     gradeLevel: cleanField(body.gradeLevel),
     subject: cleanField(body.subject),
-    homeworkText: cleanField(body.homeworkText),
+    homeworkText: normalizeHomeworkText(cleanField(body.homeworkText)),
     struggleText: cleanField(body.struggleText),
     previousAnswer: cleanField(body.previousAnswer),
     followUpType: cleanField(body.followUpType)
