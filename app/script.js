@@ -29,7 +29,7 @@ function normalizeHomeworkText(text) {
   if (isLikelyBrokenMath) {
     cleaned = lines.map(line => line.trim()).join(' ');
     cleaned = cleaned.replace(/\s+/g, ' ');
-    cleaned = cleaned.replace(/−/g, '-').replace(/×/g, '*');
+    cleaned = cleaned.replace(/\u2212/g, '-').replace(/\u00d7/g, '*');
   }
 
   return cleaned;
@@ -432,4 +432,8 @@ function getTimeStamp() {
     String(today.getSeconds()).padStart(2, '0');
 }
 
-document.getElementById('homeworkText').addEventListener('blur', cleanHomeworkTextarea);
+const homeworkTextarea = document.getElementById('homeworkText');
+homeworkTextarea.addEventListener('blur', cleanHomeworkTextarea);
+homeworkTextarea.addEventListener('paste', () => {
+  setTimeout(cleanHomeworkTextarea, 0);
+});
