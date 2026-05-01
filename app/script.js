@@ -13,6 +13,35 @@ function getSubjectValue() {
   return customSubject || selectedSubject;
 }
 
+function normalizeHomeworkText(text) {
+  if (!text) return text;
+
+  let cleaned = text.trim();
+  const lines = cleaned.split('\n');
+  const shortLines = lines.filter(line => {
+    const trimmed = line.trim();
+    return trimmed.length > 0 && trimmed.length <= 3;
+  });
+
+  const isLikelyBrokenMath =
+    lines.length > 6 && shortLines.length / lines.length > 0.6;
+
+  if (isLikelyBrokenMath) {
+    cleaned = lines.map(line => line.trim()).join(' ');
+    cleaned = cleaned.replace(/\s+/g, ' ');
+    cleaned = cleaned.replace(/−/g, '-').replace(/×/g, '*');
+  }
+
+  return cleaned;
+}
+
+function cleanHomeworkTextarea() {
+  const textarea = document.getElementById('homeworkText');
+  const cleaned = normalizeHomeworkText(textarea.value);
+  textarea.value = cleaned;
+  return cleaned;
+}
+
 function toggleCustomSubject() {
   const subjectSelect = document.getElementById('subjectSelect');
   const customSubject = document.getElementById('customSubject');
@@ -31,7 +60,7 @@ function getTutorPayload(extra = {}) {
     childName: document.getElementById('childName').value.trim(),
     gradeLevel: document.getElementById('gradeLevel').value,
     subject: getSubjectValue(),
-    homeworkText: document.getElementById('homeworkText').value.trim(),
+    homeworkText: cleanHomeworkTextarea(),
     struggleText: document.getElementById('struggleText').value.trim(),
     ...extra
   };
@@ -402,3 +431,5 @@ function getTimeStamp() {
     String(today.getMinutes()).padStart(2, '0') +
     String(today.getSeconds()).padStart(2, '0');
 }
+
+document.getElementById('homeworkText').addEventListener('blur', cleanHomeworkTextarea);
