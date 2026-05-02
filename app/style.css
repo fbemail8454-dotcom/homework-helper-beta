@@ -208,6 +208,22 @@ button:hover {
   padding: 20px 0 30px 0;
 }
 
+.reset-all-btn {
+  display: block;
+  margin: 10px auto 0;
+  padding: 7px 12px;
+  font-size: 12px;
+  background: none;
+  color: #777;
+  border: 1px solid #ccc;
+  font-weight: normal;
+}
+
+.reset-all-btn:hover {
+  background: #f0f0f0;
+  color: #444;
+}
+
 .feedback-grid {
   display: flex;
   flex-wrap: wrap;

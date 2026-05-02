@@ -384,6 +384,30 @@ function toggleDevMode() {
 }
 
 function resetApp() {
+  clearSessionState();
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+function resetAllSettings() {
+  const confirmed = confirm(
+    'Reset all setup information and current responses? This will clear names, grade, subject, custom subject, and current outputs.'
+  );
+
+  if (!confirmed) {
+    return;
+  }
+
+  document.getElementById('parentName').value = '';
+  document.getElementById('childName').value = '';
+  document.getElementById('gradeLevel').selectedIndex = 0;
+  document.getElementById('subjectSelect').selectedIndex = 0;
+  document.getElementById('customSubject').value = '';
+  document.querySelector('input[name="mode"][value="parent-guide"]').checked = true;
+  clearSessionState();
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+function clearSessionState() {
   document.getElementById('homeworkText').value = '';
   document.getElementById('struggleText').value = '';
   document.getElementById('tutorOutput').value = '';
@@ -403,7 +427,6 @@ function resetApp() {
     }
   });
   renderFeedbackLog();
-  window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 
 function getModeLabel(mode) {
