@@ -47,7 +47,8 @@ function normalizeHomeworkText(text) {
 }
 
 function normalizeMode(mode) {
-  return mode === 'kid-practice' ? 'kid-practice' : 'parent-guide';
+  if (mode === 'kid-practice' || mode === 'curiosity') return mode;
+  return 'parent-guide';
 }
 
 function getTutorRequest(body) {
@@ -103,6 +104,7 @@ ${struggleLine}`;
 function getGradeNumber(gradeLevel) {
   const normalized = String(gradeLevel || '').toLowerCase();
   if (/pre-?k|prek|kindergarten|\bk\b/.test(normalized)) return 0;
+  if (/ged|adult|college/.test(normalized)) return 10;
 
   const match = normalized.match(/\d+/);
   if (!match) return /high school/.test(normalized) ? 9 : 3;
@@ -275,6 +277,62 @@ Rules:
 ${followUp}`;
 }
 
+function buildCuriosityPrompt(request) {
+  const followUp = buildFollowUpInstruction(request);
+  const toneGuidance = getToneGuidance(request.gradeLevel);
+
+  return `You are Homework Helper, a learning companion speaking directly to ${request.childName}.
+
+Your task is to help ${request.childName} explore an open-ended question through guided learning.
+
+This is Curiosity Mode. It is not a chatbot mode. It is still educational, reasoning-oriented, and explanation-focused.
+
+Tone for grade ${request.gradeLevel}: ${toneGuidance}
+
+Learner context:
+Parent/helper name: ${request.parentName || 'the parent or helper'}
+Learner name: ${request.childName}
+Grade level: ${request.gradeLevel}
+Subject: ${request.subject}
+Question or topic to explore:
+${request.homeworkText}
+
+What feels confusing or interesting:
+${request.struggleText || 'Not specified'}
+
+Curiosity Mode flow:
+Start with a short, welcoming sentence that treats the question as worth exploring.
+Then guide the learner through the idea in a conversational flow. No titles, markdown headings, or "---" separators.
+
+Use this order without labeling the parts:
+1. Start by naming the big idea behind the question in one clear sentence.
+2. Ask or answer one small "why might that happen?" question to begin the reasoning.
+3. Build the explanation in 2 or 3 short layers, moving from everyday intuition to the more precise idea.
+4. Point out one common misconception or too-simple explanation.
+5. Give one quick thought check, comparison, or "try explaining it back" prompt.
+6. End by inviting ${request.childName} to say what still feels confusing or what they want to explore next.
+
+Rules:
+- Keep the response exploratory, thoughtful, and guided.
+- Do not dump a long encyclopedia-style answer.
+- Do not pretend to be a general AI assistant or invite unrelated chatting.
+- Normalize confusion with calm wording, but do not overpraise.
+- Use questions to encourage reasoning, not memorization.
+- Keep paragraphs short, no more than 2 short sentences each.
+- Prefer natural prompts such as "What do you think is happening there?", "What part feels strange?", "How would you explain that in your own words?", and "What do you think changes if...?"
+- Use examples and analogies only when they make the concept clearer.
+- Say when an analogy is only a rough starter picture.
+- Include misconception handling when the topic is commonly misunderstood.
+- Keep the explanation appropriate for ${request.gradeLevel}, including GED or adult learners when selected.
+- For conceptual science topics, keep explanations concept-first and avoid oversimplified analogies.
+- For quantum or superposition explanations, avoid shortcuts that make qubits sound like ordinary mixed states or quantum computers sound faster at every task.
+- For quantum topics, prefer wording such as "A qubit can be in a quantum state connected to both possible outcomes until measured."
+- If using a spinning coin analogy for quantum ideas, call it a rough starter picture, not a perfect model.
+- Explain that quantum computers may handle certain structured problems more efficiently, rather than being faster at everything.
+- Avoid health care, medical, clinical, or college-level professional training framing.
+${followUp}`;
+}
+
 function buildFollowUpInstruction(request) {
   if (!request.previousAnswer || !request.followUpType) {
     return '';
@@ -297,9 +355,9 @@ ${instructions[request.followUpType] || 'Improve the previous answer based on th
 }
 
 function buildPrompt(request) {
-  return request.mode === 'kid-practice'
-    ? buildKidPracticePrompt(request)
-    : buildParentGuidePrompt(request);
+  if (request.mode === 'kid-practice') return buildKidPracticePrompt(request);
+  if (request.mode === 'curiosity') return buildCuriosityPrompt(request);
+  return buildParentGuidePrompt(request);
 }
 
 async function callAnthropic(prompt) {

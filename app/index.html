@@ -21,16 +21,20 @@
 
     <section class="card setup-card">
       <h2>Choose a mode</h2>
-      <p class="step-note">Parent Guide helps the adult coach. Student Practice creates student-facing practice.</p>
+      <p class="step-note">Choose parent coaching, student practice, or curiosity-driven exploration.</p>
 
       <div class="mode-choice" role="group" aria-label="Homework Helper mode">
         <label class="mode-option">
           <input type="radio" name="mode" value="parent-guide" checked />
-          <span>Parent Guide</span>
+          <span>Parent Mode</span>
         </label>
         <label class="mode-option">
           <input type="radio" name="mode" value="kid-practice" />
-          <span>Student Practice</span>
+          <span>Student Mode</span>
+        </label>
+        <label class="mode-option">
+          <input type="radio" name="mode" value="curiosity" />
+          <span>Curiosity Mode</span>
         </label>
       </div>
 
@@ -71,7 +75,7 @@
       <label for="customSubject">Custom subject <span class="optional">(optional)</span></label>
       <input id="customSubject" type="text" placeholder="Type a subject if needed" />
 
-      <label for="homeworkText">Homework Assignment</label>
+      <label for="homeworkText" id="homeworkTextLabel">Homework Assignment Question</label>
       <textarea id="homeworkText" placeholder="Paste or type the problem, assignment directions, or topic here."></textarea>
 
       <label for="struggleText">What are you stuck on? <span class="optional">(optional)</span></label>
@@ -82,7 +86,7 @@
 
     <section class="card">
       <h2>Homework Helper response</h2>
-      <p class="step-note">Your parent guide or student practice appears here.</p>
+      <p class="step-note">Your parent guide, student practice, or curiosity exploration appears here.</p>
       <textarea id="tutorOutput" placeholder="Homework Helper response will appear here..." readonly></textarea>
       <div class="save-btn-row">
         <button class="save-explanation-btn" id="saveBtn_tutorOutput" onclick="saveExplanation('tutorOutput', this)">Download Response</button>

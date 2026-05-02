@@ -69,6 +69,21 @@ function clearGeneratedOutputs() {
 
 function handleModeChange() {
   clearGeneratedOutputs();
+  updateQuestionFieldForMode();
+}
+
+function updateQuestionFieldForMode() {
+  const label = document.getElementById('homeworkTextLabel');
+  const textarea = document.getElementById('homeworkText');
+
+  if (getSelectedMode() === 'curiosity') {
+    label.textContent = 'What would you like to explore?';
+    textarea.placeholder = 'Examples: Why do black holes bend light? How do volcanoes form? Why do humans dream? What causes lightning?';
+    return;
+  }
+
+  label.textContent = 'Homework Assignment Question';
+  textarea.placeholder = 'Paste or type the problem, assignment directions, or topic here.';
 }
 
 function getTutorPayload(extra = {}) {
@@ -88,6 +103,7 @@ function validateTutorPayload(payload) {
   if (!payload.childName) return 'Please enter the child name.';
   if (!payload.gradeLevel) return 'Please choose a grade level.';
   if (!payload.subject) return 'Please enter a subject.';
+  if (payload.mode === 'curiosity' && !payload.homeworkText) return 'Please enter something to explore.';
   if (!payload.homeworkText) return 'Please enter homework or problem text.';
   return '';
 }
@@ -422,6 +438,7 @@ function resetAllSettings() {
   document.getElementById('subjectSelect').selectedIndex = 0;
   document.getElementById('customSubject').value = '';
   document.querySelector('input[name="mode"][value="parent-guide"]').checked = true;
+  updateQuestionFieldForMode();
   clearSessionState();
   window.scrollTo({ top: 0, behavior: 'smooth' });
 }
@@ -438,6 +455,7 @@ function clearSessionState() {
 }
 
 function getModeLabel(mode) {
+  if (mode === 'curiosity') return 'Curiosity Mode';
   return mode === 'kid-practice' ? 'Student Practice' : 'Parent Guide';
 }
 
@@ -464,3 +482,5 @@ homeworkTextarea.addEventListener('paste', () => {
 document.querySelectorAll('input[name="mode"]').forEach(input => {
   input.addEventListener('change', handleModeChange);
 });
+
+updateQuestionFieldForMode();
