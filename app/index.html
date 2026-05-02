@@ -68,7 +68,7 @@
       </select>
 
       <label for="customSubject">Custom subject <span class="optional">(optional)</span></label>
-      <input id="customSubject" type="text" placeholder="Type a subject if needed" disabled />
+      <input id="customSubject" type="text" placeholder="Type a subject if needed" />
 
       <label for="homeworkText">Homework Assignment</label>
       <textarea id="homeworkText" placeholder="Paste or type the problem, assignment directions, or topic here."></textarea>
@@ -109,6 +109,10 @@
       </div>
     </section>
 
+    <div class="reset-row">
+      <button class="reset-btn" onclick="resetApp()">New Session</button>
+    </div>
+
     <section class="card">
       <h2>Quick feedback</h2>
       <p class="step-note">Feedback helps improve this beta. Please don't include private personal information.</p>
@@ -142,10 +146,6 @@
 
       <div id="feedbackLog" class="feedback-log"></div>
     </section>
-
-    <div class="reset-row">
-      <button class="reset-btn" onclick="resetApp()">New Session</button>
-    </div>
 
     <div class="dev-toggle-row">
       <button id="devToggleBtn" onclick="toggleDevMode()">Show Developer Mode</button>

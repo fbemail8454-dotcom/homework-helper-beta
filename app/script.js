@@ -46,10 +46,9 @@ function toggleCustomSubject() {
   const subjectSelect = document.getElementById('subjectSelect');
   const customSubject = document.getElementById('customSubject');
   const useCustom = subjectSelect.value === 'Other';
-  customSubject.disabled = !useCustom;
 
-  if (!useCustom) {
-    customSubject.value = '';
+  if (useCustom) {
+    customSubject.focus();
   }
 }
 
@@ -385,19 +384,12 @@ function toggleDevMode() {
 }
 
 function resetApp() {
-  document.getElementById('parentName').value = '';
-  document.getElementById('childName').value = '';
-  document.getElementById('gradeLevel').selectedIndex = 0;
-  document.getElementById('subjectSelect').selectedIndex = 0;
-  document.getElementById('customSubject').value = '';
-  document.getElementById('customSubject').disabled = true;
   document.getElementById('homeworkText').value = '';
   document.getElementById('struggleText').value = '';
   document.getElementById('tutorOutput').value = '';
   document.getElementById('followUpOutput').value = '';
   document.getElementById('tutorRequest').value = '';
   document.getElementById('claudeAnswer').value = '';
-  document.querySelector('input[name="mode"][value="parent-guide"]').checked = true;
   feedbackLog = [];
   feedbackSelections = { q1: null, q2: null, q3: null };
   latestOutputId = 'tutorOutput';

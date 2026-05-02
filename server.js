@@ -176,6 +176,11 @@ Rules:
 - Keep the tone reassuring, specific, and practical for a busy parent.
 - Use language appropriate for an adult helper, not a teacher manual.
 - If the subject or problem is unclear, state the best assumption and give a useful path forward.
+- For conceptual science topics, keep explanations concept-first and avoid oversimplified analogies.
+- For quantum or superposition explanations, avoid shortcuts that make qubits sound like ordinary mixed states or quantum computers sound faster at every task.
+- For quantum topics, prefer wording such as "A qubit can be in a quantum state connected to both possible outcomes until measured."
+- If using a spinning coin analogy for quantum ideas, call it a rough starter picture, not a perfect model.
+- Explain that quantum computers may handle certain structured problems more efficiently, rather than being faster at everything.
 - Avoid health care, medical, clinical, or college-level professional training framing.`;
 }
 
@@ -202,7 +207,7 @@ Use this order without labeling the parts:
 4. Walk through one smaller similar example with short steps before touching the original homework.
 5. Give 3 or 4 short practice problems. Include a mix of visual/grouping, simple numeric, and short word problem.
 6. Give quick answers for the similar practice problems only. Put answers on separate lines or after all practice questions. Do not place answers directly after questions. Do not use an "Answer Key" heading.
-7. End with this exact sentence: "When you finish, type this: Answer: ___. I'll check it."
+7. End with a natural invitation for ${request.childName} to respond in their own words. Use wording like: "Give your best answer in your own words, even if you're unsure." or "Tell me what part still feels confusing, and we'll work through it."
 
 Rules:
 - Use grade-appropriate vocabulary and sentence length.
@@ -224,7 +229,9 @@ Rules:
 - Do not automatically provide the final answer to the original homework.
 - Do not include "Check your homework after you try it:".
 - Do not include the original homework answer anywhere unless the user explicitly asks for a check later.
-- Replace the final homework answer with exactly: "When you finish, type this: Answer: ___. I'll check it."
+- Do not force the student to use a special answer label or fill-in-the-blank format.
+- Keep the closing conversational and adaptive, not like worksheet software.
+- If inviting a short answer, ask naturally without requiring a special format.
 - Prefer giving answers only for similar practice problems, not the original assignment.
 - Do not include the original homework answer inside regular practice answers.
 - Do not place answers directly after questions.
@@ -258,6 +265,10 @@ Rules:
 - Use ${request.childName} only when speaking directly to the student.
 - If the homework is about division or equal sharing, align with this approach: the number of groups is known, and the child is finding how many are in each group. Do not introduce it as "groups of 6" unless the original problem clearly gives the group size.
 - If the original homework includes a specific answer, create similar practice rather than just handing over the answer.
+- For conceptual science topics, avoid oversimplified claims that make qubits sound like ordinary mixed states or quantum computers sound faster at every task.
+- For quantum or superposition explanations, prefer wording such as "A qubit can be in a quantum state connected to both possible outcomes until measured."
+- If using a spinning coin analogy for quantum ideas, call it a rough starter picture, not a perfect model.
+- Explain that quantum computers may handle certain structured problems more efficiently, rather than being faster at everything.
 - Avoid health care, medical, clinical, or college-level professional training framing.
 ${followUp}`;
 }
