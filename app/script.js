@@ -390,7 +390,7 @@ function resetApp() {
 
 function resetAllSettings() {
   const confirmed = confirm(
-    'Reset all setup information and current responses? This will clear names, grade, subject, custom subject, and current outputs.'
+    'Switch to a different student and clear current setup information? This will clear names, grade, subject selections, custom subjects, and current assignment responses.'
   );
 
   if (!confirmed) {
