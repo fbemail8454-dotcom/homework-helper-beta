@@ -52,6 +52,25 @@ function toggleCustomSubject() {
   }
 }
 
+function clearGeneratedOutputs() {
+  document.getElementById('tutorOutput').value = '';
+  document.getElementById('followUpOutput').value = '';
+  document.getElementById('tutorRequest').value = '';
+  document.getElementById('claudeAnswer').value = '';
+  latestOutputId = 'tutorOutput';
+  ['tutorOutput', 'followUpOutput'].forEach(id => {
+    const btn = document.getElementById('saveBtn_' + id);
+    if (btn) {
+      btn.textContent = 'Save Response';
+      btn.classList.remove('saved');
+    }
+  });
+}
+
+function handleModeChange() {
+  clearGeneratedOutputs();
+}
+
 function getTutorPayload(extra = {}) {
   return {
     mode: getSelectedMode(),
@@ -410,22 +429,11 @@ function resetAllSettings() {
 function clearSessionState() {
   document.getElementById('homeworkText').value = '';
   document.getElementById('struggleText').value = '';
-  document.getElementById('tutorOutput').value = '';
-  document.getElementById('followUpOutput').value = '';
-  document.getElementById('tutorRequest').value = '';
-  document.getElementById('claudeAnswer').value = '';
+  clearGeneratedOutputs();
   feedbackLog = [];
   feedbackSelections = { q1: null, q2: null, q3: null };
-  latestOutputId = 'tutorOutput';
   document.querySelectorAll('.feedback-option-btn').forEach(btn => btn.classList.remove('selected'));
   document.getElementById('feedbackComment').value = '';
-  ['tutorOutput', 'followUpOutput'].forEach(id => {
-    const btn = document.getElementById('saveBtn_' + id);
-    if (btn) {
-      btn.textContent = 'Save Response';
-      btn.classList.remove('saved');
-    }
-  });
   renderFeedbackLog();
 }
 
@@ -451,4 +459,8 @@ const homeworkTextarea = document.getElementById('homeworkText');
 homeworkTextarea.addEventListener('blur', cleanHomeworkTextarea);
 homeworkTextarea.addEventListener('paste', () => {
   setTimeout(cleanHomeworkTextarea, 0);
+});
+
+document.querySelectorAll('input[name="mode"]').forEach(input => {
+  input.addEventListener('change', handleModeChange);
 });
