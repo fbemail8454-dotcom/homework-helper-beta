@@ -66,18 +66,33 @@ function getTutorRequest(body) {
   };
 
   if (!request.childName) {
-    throw new Error('Child name is required.');
+    if (request.mode === 'curiosity') {
+      request.childName = 'the learner';
+    } else {
+      throw new Error('Child name is required.');
+    }
   }
 
   if (!request.gradeLevel) {
-    throw new Error('Grade level is required.');
+    if (request.mode === 'curiosity') {
+      request.gradeLevel = 'general learner-friendly level';
+    } else {
+      throw new Error('Grade level is required.');
+    }
   }
 
   if (!request.subject) {
-    throw new Error('Subject is required.');
+    if (request.mode === 'curiosity') {
+      request.subject = 'general curiosity/exploration';
+    } else {
+      throw new Error('Subject is required.');
+    }
   }
 
   if (!request.homeworkText) {
+    if (request.mode === 'curiosity') {
+      throw new Error('Please enter something to explore.');
+    }
     throw new Error('Homework or problem text is required.');
   }
 

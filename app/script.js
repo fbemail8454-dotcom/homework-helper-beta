@@ -100,10 +100,14 @@ function getTutorPayload(extra = {}) {
 }
 
 function validateTutorPayload(payload) {
+  if (payload.mode === 'curiosity') {
+    if (!payload.homeworkText) return 'Please enter something to explore.';
+    return '';
+  }
+
   if (!payload.childName) return 'Please enter the child name.';
   if (!payload.gradeLevel) return 'Please choose a grade level.';
   if (!payload.subject) return 'Please enter a subject.';
-  if (payload.mode === 'curiosity' && !payload.homeworkText) return 'Please enter something to explore.';
   if (!payload.homeworkText) return 'Please enter homework or problem text.';
   return '';
 }
