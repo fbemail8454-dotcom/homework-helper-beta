@@ -201,7 +201,7 @@ async function prepareTutorRequest() {
 function sendToExplanation() {
   const raw = document.getElementById('claudeAnswer').value.trim();
   if (!raw) {
-    alert("Please paste Claude's answer first.");
+    alert('Please paste the manual AI answer first.');
     return;
   }
 

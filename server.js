@@ -17,6 +17,10 @@ if (!apiKey) {
 app.use(express.json({ limit: '1mb' }));
 app.use(express.static(path.join(__dirname, 'app')));
 
+app.get('/healthz', (req, res) => {
+  res.status(200).json({ ok: true, service: 'kidtutor' });
+});
+
 function cleanField(value) {
   return typeof value === 'string' ? value.trim() : '';
 }

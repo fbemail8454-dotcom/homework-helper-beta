@@ -49,6 +49,45 @@ ANTHROPIC_MODEL=claude-sonnet-4-6
 
 Do not commit real environment values.
 
+## Render Deployment
+
+This app is currently set up for a Render-first deployment while keeping the existing Anthropic API integration.
+
+Use a new KidTutor-owned Render web service. Do not reuse nurse-tutor services, environment groups, or secrets.
+
+Recommended Render settings:
+
+```text
+Service name: kidtutor-web
+Runtime: Node
+Build command: npm install
+Start command: npm start
+Health check path: /healthz
+```
+
+Required Render environment variables:
+
+```text
+ANTHROPIC_API_KEY=your_render_secret_value
+```
+
+Optional Render environment variables:
+
+```text
+ANTHROPIC_MODEL=claude-sonnet-4-6
+NODE_ENV=production
+```
+
+The repo includes `render.yaml` with the same service settings. `ANTHROPIC_API_KEY` is marked with `sync: false` so the secret value must be entered in Render and is not committed to the repo.
+
+After deploying, verify:
+
+```text
+https://your-render-url.onrender.com/healthz
+```
+
+Then test Parent Mode, Student Mode, Curiosity Mode, follow-ups, and feedback from the deployed app URL.
+
 ## Current MVP Limitations
 
 - No user accounts or authentication.
@@ -57,5 +96,6 @@ Do not commit real environment values.
 - No image upload.
 - No Perplexity integration.
 - Feedback is stored locally in `feedback/feedback.json`.
+- On Render, local feedback storage is not a durable production storage plan unless a persistent disk or external datastore is added.
 - The app does not verify homework correctness independently beyond the model response.
 - The frontend is intentionally plain HTML, CSS, and JavaScript for this phase.
