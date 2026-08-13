@@ -20,6 +20,36 @@ Get KidTutor deployed as its own Render web service first, while keeping the cur
 - Current default model in code: `claude-sonnet-4-6`
 - OpenAI is planned later, not part of the first Render setup.
 
+## Codex Evaluation Context
+
+Read-only app evaluation completed from the repo root on 2026-08-13.
+
+Evaluation summary:
+
+- KidTutor is currently a small Homework Helper MVP, not a Lorekee-scale study
+  workspace.
+- Current modes are Parent Mode, Student Mode, and Curiosity Mode.
+- The app already has grade level, subject/custom subject, homework/topic text,
+  "what are you stuck on?", simple follow-up buttons, response/session
+  downloads, quick feedback, and a developer/manual prompt bridge.
+- Active runtime prompts are inline in `server.js`.
+- The old nursing prompt files in `prompts/` are stale artifacts and do not
+  appear to be imported by `server.js`.
+- The app is not yet connected to OpenAI. The roadmap already preserves the
+  provider/deployment plan.
+- Future enhancement work should compare against Lorekee lessons learned, but
+  KidTutor should stay much lighter and simpler.
+- Before judging safety, minors, or enhancement scope, inspect the actual app
+  behavior and repo state first.
+
+Potential future enhancement eval should report:
+
+- what KidTutor should borrow from Lorekee
+- what KidTutor should deliberately avoid
+- what belongs in a lightweight K-12 roadmap
+- which stale artifacts or provider leftovers should be cleaned before larger
+  work
+
 ## Changes Already Prepared For Render
 
 - `server.js` has a `/healthz` endpoint.
