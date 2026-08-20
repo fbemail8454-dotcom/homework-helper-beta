@@ -193,6 +193,10 @@ function getTaskShape(request) {
   if (request.followUpType === 'answer-question') return 'learner-explanation';
 
   if (subjectFamily === 'math') {
+    if (/\b(derivative|differentiate|velocity|rate of change|position function|acceleration)\b/.test(text) || /\bs\s*\(\s*t\s*\)/i.test(request.homeworkText || '')) {
+      return 'rate-of-change';
+    }
+
     const hasEquation = /=/.test(text) || /\b(solve for|equation|isolate|simplify|combine like terms)\b/.test(text);
     const hasVariable = /[a-z]/i.test(request.homeworkText || '') || /\bvariable\b/.test(text);
 
@@ -251,9 +255,11 @@ function buildGradeBandStrategy(gradeBand) {
 - Focus on the next reasoning move, not a long mini-lesson.
 - Ask one targeted follow-up question.`,
     'high-school-adult': `Grade-band strategy:
-- Use concise academic language.
+- Use concise academic language without sounding abrupt.
 - Use accurate subject terms without babying the learner.
+- Include one brief sentence about why the method fits when it helps.
 - Give the first concrete move when the learner asks where to start.
+- Give enough closure for the current step when the pieces are already established.
 - Keep examples minimal and closely matched to the original task.`
   };
 
@@ -265,8 +271,9 @@ function buildSubjectStrategy(routing) {
     math: `Subject strategy for Math:
 - Identify the mathematical structure before choosing an example.
 - For high school or adult math, use precise terms such as "distribute," "combine like terms," and "isolate the variable" when they are the right terms.
+- When the learner has enough pieces, state the combined step result and include units when appropriate.
 - For elementary math, use concrete actions and visual models before formal terms.
-- Do not give the final original answer unless the learner is checking work or explicitly asks for a check.`,
+- Do not give the full final original answer unless the learner is checking work or explicitly asks for a check.`,
     science: `Subject strategy for Science:
 - Keep explanations concept-first.
 - Name the process, cause, or relationship behind the question.
@@ -300,6 +307,12 @@ function buildTaskShapeStrategy(routing) {
 - Do not solve the full equation immediately.
 - Use a smaller example only if the first move still seems unclear.
 - Keep any example tightly matched to the original operation.`,
+    'rate-of-change': `Task-shape strategy for rate-of-change math:
+- Name the relationship first: velocity is the rate of change of position.
+- Explain why the derivative is the right move.
+- Differentiate term by term, then state the velocity expression when the pieces are established.
+- Treat the velocity expression as current-step closure, not answer dumping.
+- Include units when the problem gives position and time units.`,
     'math-word-problem': `Task-shape strategy for math word problems:
 - Help identify what is known, what is being asked, and the operation or relationship.
 - Do not compute the final original answer before the learner tries the setup.
@@ -456,21 +469,21 @@ Rules:
 - Do not include parent coaching advice in this mode.
 - Use student language, not kid language.
 - Follow the grade tone exactly.
-- For grades 9 through 12, use a concise academic tone with no emojis, no childish praise, and no babyish wording.
+- For grades 9 through 12, use a concise academic tone with no emojis, no childish praise, and no babyish wording, but do not sound abrupt.
 - For grades 6 through 8, stay direct and respectful. Avoid babyish language and use minimal emojis.
 - For grades K through 5, friendly encouragement is okay.
 - Keep it clear, direct, and casual only when that fits the grade band.
 - Make the response feel like real-time tutoring, not a worksheet or handout.
 - Keep the whole response about 25 percent shorter than a typical lesson response.
-- Use short sentences and only essential explanation.
+- Use focused explanation with enough context to learn.
 - Apply the instructional routing above when it conflicts with the default flow.
 - Do not solve the original homework immediately.
 - Guide the setup first, then use smaller similar examples.
 - For multi-part word problems, identify the total amount, the group size or number of groups, and what each question asks.
 - Do not compute all final answers right away.
-- Do not automatically provide the final answer to the original homework.
+- Do not automatically provide the full final answer to multi-step original homework.
 - Do not include "Check your homework after you try it:".
-- Do not include the original homework answer anywhere unless the user explicitly asks for a check later.
+- Do not include the full original homework answer unless the user explicitly asks for a check later, but you may state a current-step result when that is the teaching target.
 - Do not force the student to use a special answer label or fill-in-the-blank format.
 - Keep the closing conversational and adaptive, not like worksheet software.
 - If inviting a short answer, ask naturally without requiring a special format.
@@ -581,7 +594,7 @@ function buildFollowUpInstruction(request) {
   const instructions = {
     'answer-question': 'Respond to the learner\'s reply to the question from the previous Homework Helper answer. Treat the reply as an attempted explanation. Say what is on track, gently refine incomplete or unclear parts, and help turn it into a complete grade-appropriate answer. If the reply is incomplete, ask one short next question instead of giving a full solution.',
     'check-answer': 'Check the learner\'s attempted answer or work. Say what looks right first. If something is wrong, identify the first important mistake and guide the next correction step. Do not just give the final answer.',
-    clearer: 'Make the next response clearer and simpler than the previous one.',
+    clearer: 'Make the next response easier to learn from. Add one brief why-this-works or how-the-pieces-connect sentence when useful; do not merely shorten the previous response.',
     hint: 'Give one helpful hint that nudges the learner forward without giving away the original homework answer.',
     step: 'Explain the specific step the learner is stuck on. If no step is named, choose the most likely confusing step and explain it briefly.',
     example: 'Try a different concrete example that matches the child\'s grade level and subject. Keep it similar, but do not use the original homework answer as the example.',

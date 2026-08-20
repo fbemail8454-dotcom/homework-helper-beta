@@ -356,6 +356,7 @@ Initial subject families:
 Initial task shapes:
 
 - procedural equation
+- rate-of-change math
 - math word problem
 - math practice
 - concept explanation
@@ -384,7 +385,45 @@ Risk assessment:
 - UI risk: Low, because this phase does not change the visible workflow.
 - Deployment risk: Low, because Render service configuration and provider integration stay unchanged.
 
-### Phase 8: Decide feedback storage before production traffic
+### Phase 8: Teacher Presence Tuning
+
+Feature name: `Teacher Presence Tuning`
+
+Purpose: make Student Practice responses feel more like a present tutor and less like a terse answer gate, without turning KidTutor into an answer-dumping homework solver.
+
+Implementation scope:
+
+1. Keep the frontend, API contract, Render config, and Anthropic provider unchanged.
+2. Limit prompt behavior changes to Student Practice and shared follow-up instructions.
+3. Use compressed integration: replace restrictive wording instead of adding a large new prompt block.
+4. Make high-school/adult Student Practice concise but not abrupt.
+5. Let Math responses give closure for the current step when the learner already has the pieces, including units when the problem provides them.
+6. Route derivative, velocity, position-function, and rate-of-change math separately from equation-solving prompts.
+7. Make `Make It Clearer` mean easier to learn from, not merely shorter.
+8. Preserve grade differences:
+   - K-5 stays simple, concrete, and warm.
+   - 6-8 stays direct, respectful, and not babyish.
+   - 9-12/GED stays accurate and concise, with a brief why-this-method-fits sentence when useful.
+
+Acceptance checks:
+
+- `npm test` passes.
+- `node --check server.js` passes.
+- `node --check app\script.js` passes.
+- `git diff --check` passes.
+- Prompt smoke cases include high-school calculus/rate-of-change, GED/adult learning, and a clearer follow-up teacher-presence case.
+- Existing K-5, 6-8, reading, writing, social studies, answer-question, and check-answer routing smoke cases still pass.
+- Parent Guide and Curiosity Mode prompt shapes remain unchanged.
+- Prompt size stays near-neutral because wording is replaced rather than expanded into a new helper layer.
+
+Risk assessment:
+
+- Code risk: Low.
+- Prompt quality risk: Medium, because teacherly tone is subjective.
+- Token growth risk: Low.
+- Cross-grade risk: Low to Medium, because the change is tested across grade bands.
+
+### Phase 9: Decide feedback storage before production traffic
 
 1. For beta-only use, keep local feedback and document that Render instances may not preserve it reliably.
 2. For production, move feedback to a durable store before relying on it.
@@ -396,7 +435,7 @@ Acceptance checks:
 - Product owner chooses `local beta`, `persistent disk`, or `database`.
 - README clearly explains where feedback goes.
 
-### Phase 9: OpenAI migration track
+### Phase 10: OpenAI migration track
 
 Keep this plan ready, but do not block the first Render deployment on it.
 
@@ -413,7 +452,7 @@ Acceptance checks:
 - Error responses do not expose secrets.
 - Follow-up prompts still work through the same endpoint.
 
-### Phase 10: Verification checklist
+### Phase 11: Verification checklist
 
 Run after Render-first implementation:
 
@@ -435,7 +474,8 @@ Run after Render-first implementation:
 - Should feedback remain local for beta testing, or should we add durable storage now?
 - Do we want a separate staging Render service before production?
 - Should prompt routing later extend Parent Guide and Curiosity Mode, or remain Student Practice focused?
+- How much teacher presence is enough before responses feel too long for younger students?
 
 ## Recommended Next Move
 
-After the Render deployment and cleanup phases, stabilize the prompt architecture with live Student Practice examples before changing provider or storage layers. Keep Anthropic in place until prompt routing and feedback storage decisions are stable, then handle the OpenAI cutover as a separate provider migration.
+After the Render deployment and cleanup phases, collect live Student Practice examples across grade bands before changing provider or storage layers. Keep Anthropic in place until prompt routing, teacher presence, and feedback storage decisions are stable, then handle the OpenAI cutover as a separate provider migration.

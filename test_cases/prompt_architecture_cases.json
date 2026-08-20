@@ -188,5 +188,77 @@
         "For check-answer, evaluate the attempted work"
       ]
     }
+  },
+  {
+    "name": "high_school_calculus_velocity",
+    "request": {
+      "mode": "kid-practice",
+      "childName": "John",
+      "gradeLevel": "High school",
+      "subject": "Math",
+      "homeworkText": "A particle moves along a straight line, and its position is given by s(t) = 4 sin(t) - 2t where s(t) is measured in meters and t in seconds.",
+      "struggleText": "particle velocity"
+    },
+    "expect": {
+      "gradeBand": "high-school-adult",
+      "subjectFamily": "math",
+      "taskShape": "rate-of-change",
+      "includes": [
+        "Task shape: rate-of-change",
+        "Task-shape strategy for rate-of-change math",
+        "velocity is the rate of change of position",
+        "state the velocity expression when the pieces are established",
+        "current-step closure, not answer dumping",
+        "include units when appropriate"
+      ]
+    }
+  },
+  {
+    "name": "ged_adult_writing_revision",
+    "request": {
+      "mode": "kid-practice",
+      "childName": "Riley",
+      "gradeLevel": "GED / Adult Learning",
+      "subject": "Writing",
+      "homeworkText": "Revise this short response so the main point is clear and the evidence connects to the question.",
+      "struggleText": "I need it to sound clearer but still like me."
+    },
+    "expect": {
+      "gradeBand": "high-school-adult",
+      "subjectFamily": "writing",
+      "taskShape": "writing-revision",
+      "includes": [
+        "Grade band: high-school-adult",
+        "Subject strategy for Writing",
+        "Use concise academic language without sounding abrupt",
+        "Give enough closure for the current step"
+      ]
+    }
+  },
+  {
+    "name": "math_clearer_teacher_presence_follow_up",
+    "request": {
+      "mode": "kid-practice",
+      "childName": "John",
+      "gradeLevel": "High school",
+      "subject": "Math",
+      "homeworkText": "A particle moves along a straight line, and its position is s(t) = 4 sin(t) - 2t. Find the particle velocity.",
+      "struggleText": "particle velocity",
+      "previousAnswer": "Velocity is the derivative of position. The derivative of 4sin(t) is 4cos(t), and the derivative of -2t is -2.",
+      "followUpType": "clearer",
+      "followUpText": ""
+    },
+    "expect": {
+      "gradeBand": "high-school-adult",
+      "subjectFamily": "math",
+      "taskShape": "rate-of-change",
+      "includes": [
+        "Task shape: rate-of-change",
+        "Make the next response easier to learn from",
+        "how-the-pieces-connect sentence",
+        "current-step result when that is the teaching target",
+        "do not merely shorten"
+      ]
+    }
   }
 ]
