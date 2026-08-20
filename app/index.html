@@ -15,7 +15,7 @@
       <div class="mode-header">Tutor Session</div>
       <div class="session-save-group">
         <p class="session-save-reminder">Before you leave, save this session</p>
-        <button onclick="saveTutorSession()">Download Session</button>
+        <button onclick="saveTutorSession()">Save This Session</button>
       </div>
     </div>
 
@@ -94,20 +94,21 @@
     </section>
 
     <section class="card">
-      <h2>Need another pass?</h2>
-      <p class="step-note">Ask Homework Helper to adjust the response without starting over.</p>
-
-      <label for="followUpText">What should KidTutor focus on? <span class="optional">(optional)</span></label>
-      <textarea id="followUpText" class="short-textarea" placeholder="Example: I don't get step 2, check my answer, make it shorter"></textarea>
+      <h2>Choose what you want next</h2>
+      <p class="step-note">Pick an action, or add a reply below first if KidTutor asked a question.</p>
 
       <div class="feedback-grid">
-        <button class="feedback-btn" onclick="generateFollowUp('clearer')">Make it clearer</button>
-        <button class="feedback-btn" onclick="generateFollowUp('hint')">Give me a hint</button>
-        <button class="feedback-btn" onclick="generateFollowUp('check-answer')">Check my answer</button>
-        <button class="feedback-btn" onclick="generateFollowUp('step')">Explain this step</button>
-        <button class="feedback-btn" onclick="generateFollowUp('example')">Try a different example</button>
-        <button class="feedback-btn" onclick="generateFollowUp('practice')">More practice</button>
+        <button class="feedback-btn" onclick="generateFollowUp('answer-question')">Answer KidTutor's Question</button>
+        <button class="feedback-btn" onclick="generateFollowUp('check-answer')">Check My Answer</button>
+        <button class="feedback-btn" onclick="generateFollowUp('clearer')">Make It Clearer</button>
+        <button class="feedback-btn" onclick="generateFollowUp('hint')">Give Me a Hint</button>
+        <button class="feedback-btn" onclick="generateFollowUp('step')">Explain This Step</button>
+        <button class="feedback-btn" onclick="generateFollowUp('example')">Try Another Example</button>
+        <button class="feedback-btn" onclick="generateFollowUp('practice')">More Practice</button>
       </div>
+
+      <label for="followUpText">Reply to KidTutor <span class="optional">(needed for answer/check)</span></label>
+      <textarea id="followUpText" class="short-textarea" placeholder="Type your answer, question, or what still feels confusing..."></textarea>
     </section>
 
     <section class="card card-followup">
@@ -117,6 +118,12 @@
       <div class="save-btn-row">
         <button class="save-explanation-btn" id="saveBtn_followUpOutput" onclick="saveExplanation('followUpOutput', this)">Download Response</button>
       </div>
+    </section>
+
+    <section class="card">
+      <h2>Save your work</h2>
+      <p class="step-note">Finished? Save the homework, response, reply, and follow-up.</p>
+      <button onclick="saveTutorSession()">Save This Session</button>
     </section>
 
     <div class="reset-row">

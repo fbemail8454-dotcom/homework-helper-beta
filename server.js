@@ -361,24 +361,24 @@ function buildFollowUpInstruction(request) {
   }
 
   const instructions = {
+    'answer-question': 'Respond to the learner\'s reply to the question from the previous Homework Helper answer. Treat the reply as an attempted explanation. Say what is on track, gently refine incomplete or unclear parts, and help turn it into a complete grade-appropriate answer. If the reply is incomplete, ask one short next question instead of giving a full solution.',
+    'check-answer': 'Check the learner\'s attempted answer or work. Say what looks right first. If something is wrong, identify the first important mistake and guide the next correction step. Do not just give the final answer.',
     clearer: 'Make the next response clearer and simpler than the previous one.',
     hint: 'Give one helpful hint that nudges the learner forward without giving away the original homework answer.',
-    'check-answer': 'Check the learner\'s attempted answer or work. Say what looks right, identify the first important mistake if there is one, and guide the next correction step. Do not just give the final answer.',
     step: 'Explain the specific step the learner is stuck on. If no step is named, choose the most likely confusing step and explain it briefly.',
     example: 'Try a different concrete example that matches the child\'s grade level and subject. Keep it similar, but do not use the original homework answer as the example.',
-    steps: 'Break the help into smaller step-by-step guidance.',
     practice: 'Add more practice while keeping the same mode and grade level.'
   };
 
-  const focus = request.followUpText
-    ? `\n\nWhat the user wants help with now:\n${request.followUpText}`
+  const reply = request.followUpText
+    ? `\n\nLearner/parent reply:\n${request.followUpText}`
     : '';
 
   return `
 
 Previous Homework Helper answer:
 ${request.previousAnswer}
-${focus}
+${reply}
 
 Follow-up request:
 ${instructions[request.followUpType] || 'Improve the previous answer based on the helper\'s needs.'}
@@ -387,7 +387,15 @@ Follow-up rules:
 - Keep the same mode, grade level, subject, learner name, and safety boundaries.
 - Respond to the follow-up directly; do not restart the whole session unless needed.
 - Preserve guided learning. Do not turn into an answer-dumping homework solver.
-- If the follow-up asks to check an answer but no attempted answer is provided, ask for the attempted answer or work first.`;
+- Treat "Learner/parent reply" as optional context unless the action is answer-question or check-answer.
+- For answer-question, respond to the reply as an attempted explanation, not as a request for a new lesson.
+- For check-answer, evaluate the attempted work, but preserve guided learning.
+- If the learner is partly correct, say exactly what is correct before correcting.
+- Ask at most one short next question unless the selected action is practice.
+- Keep the follow-up shorter than the original response.
+- Do not repeat the full previous answer.
+- If the follow-up asks to check or answer but no attempted reply is provided, ask for the attempted answer or work first.
+- For follow-up requests, these follow-up rules override the initial output format when they conflict.`;
 }
 
 function buildPrompt(request) {

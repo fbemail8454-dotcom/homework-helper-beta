@@ -1,6 +1,17 @@
 let feedbackLog = [];
 let feedbackSelections = { q1: null, q2: null, q3: null };
 let latestOutputId = 'tutorOutput';
+let latestFollowUpAction = '';
+
+const followUpActionLabels = {
+  'answer-question': 'Answer KidTutor\'s Question',
+  'check-answer': 'Check My Answer',
+  clearer: 'Make It Clearer',
+  hint: 'Give Me a Hint',
+  step: 'Explain This Step',
+  example: 'Try Another Example',
+  practice: 'More Practice'
+};
 
 function getSelectedMode() {
   const selected = document.querySelector('input[name="mode"]:checked');
@@ -57,6 +68,7 @@ function clearGeneratedOutputs() {
   document.getElementById('followUpOutput').value = '';
   document.getElementById('followUpText').value = '';
   latestOutputId = 'tutorOutput';
+  latestFollowUpAction = '';
   ['tutorOutput', 'followUpOutput'].forEach(id => {
     const btn = document.getElementById('saveBtn_' + id);
     if (btn) {
@@ -133,8 +145,8 @@ async function generateFollowUp(followUpType) {
     return;
   }
 
-  if (followUpType === 'check-answer' && !followUpText) {
-    alert('Type the answer or work you want checked first.');
+  if (requiresReplyText(followUpType) && !followUpText) {
+    focusFollowUpText(followUpType);
     return;
   }
 
@@ -145,8 +157,30 @@ async function generateFollowUp(followUpType) {
     return;
   }
 
+  latestFollowUpAction = getFollowUpActionLabel(followUpType);
   latestOutputId = 'followUpOutput';
   await callTutor(payload, 'followUpOutput');
+}
+
+function requiresReplyText(followUpType) {
+  return followUpType === 'answer-question' || followUpType === 'check-answer';
+}
+
+function getFollowUpActionLabel(followUpType) {
+  return followUpActionLabels[followUpType] || 'Follow-up';
+}
+
+function focusFollowUpText(followUpType) {
+  const replyBox = document.getElementById('followUpText');
+  replyBox.scrollIntoView({ behavior: 'smooth', block: 'center' });
+  replyBox.focus();
+
+  if (followUpType === 'answer-question') {
+    alert('Type your answer to KidTutor first.');
+    return;
+  }
+
+  alert('Type the answer or work you want checked first.');
 }
 
 async function callTutor(payload, targetId) {
@@ -225,18 +259,21 @@ function saveTutorSession() {
   content += sep + '\n';
   content += (payload.struggleText || '(none)') + '\n';
 
-  const followUpFocus = document.getElementById('followUpText').value.trim();
-  if (followUpFocus) {
-    content += '\n' + sep + '\n';
-    content += '=== FOLLOW-UP FOCUS ===\n';
-    content += sep + '\n';
-    content += followUpFocus + '\n';
-  }
-
   content += '\n' + sep + '\n';
   content += '=== HOMEWORK HELPER RESPONSE ===\n';
   content += sep + '\n';
   content += (first || '(none)') + '\n';
+
+  const followUpReply = document.getElementById('followUpText').value.trim();
+  content += '\n' + sep + '\n';
+  content += '=== STUDENT / PARENT REPLY ===\n';
+  content += sep + '\n';
+  content += (followUpReply || '(none)') + '\n';
+
+  content += '\n' + sep + '\n';
+  content += '=== FOLLOW-UP ACTION ===\n';
+  content += sep + '\n';
+  content += (latestFollowUpAction || '(none)') + '\n';
 
   if (followUp) {
     content += '\n' + sep + '\n';
@@ -322,6 +359,7 @@ function saveFeedback() {
     homeworkText: payload.homeworkText,
     struggleText: payload.struggleText,
     followUpText: document.getElementById('followUpText').value.trim(),
+    followUpAction: latestFollowUpAction,
     response: document.getElementById('tutorOutput').value.trim(),
     followUpResponse: document.getElementById('followUpOutput').value.trim(),
     q1: q1 || '-',

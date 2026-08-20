@@ -23,17 +23,17 @@ Move KidTutor off all nurse-tutor and Anthropic/Claude-era wiring, then standard
 ### AI provider setup
 
 - `server.js:10-11` reads `ANTHROPIC_API_KEY` and `ANTHROPIC_MODEL`.
-- `server.js:399-438` calls `https://api.anthropic.com/v1/messages` directly with Anthropic-specific headers.
-- `server.js:445-452` sends generated tutor prompts to the Anthropic call path through `/api/tutor`.
+- `server.js:407-446` calls `https://api.anthropic.com/v1/messages` directly with Anthropic-specific headers.
+- `server.js:453-460` sends generated tutor prompts to the Anthropic call path through `/api/tutor`.
 - `.env.example` documents only `ANTHROPIC_API_KEY` and `ANTHROPIC_MODEL`.
 - `README.md` documents Anthropic setup and model defaults.
 - `package.json` has no `openai` package dependency.
 
 ### Frontend and internal API calls
 
-- `app/script.js:158` calls `/api/tutor`.
-- `app/script.js:343` calls `/api/feedback`.
-- `app/index.html:100-109` provides guided follow-up controls for clearer help, hints, answer checking, step explanation, alternate examples, and more practice.
+- `app/script.js:192` calls `/api/tutor`.
+- `app/script.js:381` calls `/api/feedback`.
+- `app/index.html:97-111` provides action-first reply controls for learner replies, answer checking, clearer help, hints, step explanation, alternate examples, and more practice.
 - These frontend calls are relative paths, which is good for Render because the static frontend and Express API can be served from the same origin.
 - Developer Mode and the manual prompt bridge have been removed from the production UI.
 
@@ -269,7 +269,7 @@ For the first deployment, feedback can stay local as beta-only feedback. Before 
 
 Feature name: `Guided Follow-Up Upgrade`
 
-1. Add an optional follow-up focus field under "Need another pass?"
+1. Add an optional follow-up context field under the main Homework Helper response.
 2. Expand follow-up actions to include:
    - Make it clearer
    - Give me a hint
@@ -287,9 +287,31 @@ Acceptance checks:
 - Parent Mode, Student Mode, and Curiosity Mode follow-ups still use the same endpoint.
 - "Check my answer" asks for an attempt before sending.
 - Follow-up instructions preserve guided learning and avoid answer dumping.
-- Session downloads and feedback can include the follow-up focus and response.
+- Session downloads and feedback can include the follow-up context and response.
 
-### Phase 6: Decide feedback storage before production traffic
+### Phase 6: Reply Workflow Cleanup
+
+Cleanup name: `Reply Workflow Cleanup`
+
+1. Rename the follow-up area from "Need another pass?" to "Choose what you want next."
+2. Place the seven follow-up actions above the reply field so the user chooses the action first.
+3. Treat the reply box as a learner/parent reply field that can hold an answer, question, or confusion note.
+4. Add `Answer KidTutor's Question` as a distinct action from `Check My Answer`.
+5. Require reply text for `Answer KidTutor's Question` and `Check My Answer`; focus the reply box when either is clicked empty.
+6. Keep clearer, hint, step, example, and practice actions usable with or without reply text.
+7. Track the selected follow-up action for downloads and feedback.
+8. Save transcripts with `STUDENT / PARENT REPLY`, `FOLLOW-UP ACTION`, and `FOLLOW-UP RESPONSE`.
+9. Add a bottom `Save This Session` button after the follow-up response, and rename the top session button to match.
+10. Refine follow-up prompts so `answer-question` responds to a learner explanation while `check-answer` evaluates attempted work.
+
+Acceptance checks:
+
+- Reply/action workflow supports both typed learner answers and no-text helper actions.
+- Empty required-reply actions focus the reply field and do not call the model.
+- Session downloads include reply text, selected action, and follow-up response.
+- Normal Parent Mode, Student Mode, Curiosity Mode, feedback, and health checks still work.
+
+### Phase 7: Decide feedback storage before production traffic
 
 1. For beta-only use, keep local feedback and document that Render instances may not preserve it reliably.
 2. For production, move feedback to a durable store before relying on it.
@@ -301,7 +323,7 @@ Acceptance checks:
 - Product owner chooses `local beta`, `persistent disk`, or `database`.
 - README clearly explains where feedback goes.
 
-### Phase 7: OpenAI migration track
+### Phase 8: OpenAI migration track
 
 Keep this plan ready, but do not block the first Render deployment on it.
 
@@ -318,7 +340,7 @@ Acceptance checks:
 - Error responses do not expose secrets.
 - Follow-up prompts still work through the same endpoint.
 
-### Phase 8: Verification checklist
+### Phase 9: Verification checklist
 
 Run after Render-first implementation:
 
@@ -341,4 +363,4 @@ Run after Render-first implementation:
 
 ## Recommended Next Move
 
-After the Render deployment and cleanup phases, prioritize the lightweight tutoring loop improvements first. Keep Anthropic in place until the guided follow-up flow and feedback storage decision are stable, then handle the OpenAI cutover as a separate provider migration.
+After the Render deployment and cleanup phases, prioritize the lightweight tutoring loop improvements first. Keep Anthropic in place until the reply workflow and feedback storage decision are stable, then handle the OpenAI cutover as a separate provider migration.
