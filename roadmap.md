@@ -23,19 +23,18 @@ Move KidTutor off all nurse-tutor and Anthropic/Claude-era wiring, then standard
 ### AI provider setup
 
 - `server.js:10-11` reads `ANTHROPIC_API_KEY` and `ANTHROPIC_MODEL`.
-- `server.js:378-421` calls `https://api.anthropic.com/v1/messages` directly with Anthropic-specific headers.
-- `server.js:424-435` sends generated tutor prompts to the Anthropic call path through `/api/tutor`.
+- `server.js:382-421` calls `https://api.anthropic.com/v1/messages` directly with Anthropic-specific headers.
+- `server.js:428-435` sends generated tutor prompts to the Anthropic call path through `/api/tutor`.
 - `.env.example` documents only `ANTHROPIC_API_KEY` and `ANTHROPIC_MODEL`.
 - `README.md` documents Anthropic setup and model defaults.
 - `package.json` has no `openai` package dependency.
 
 ### Frontend and internal API calls
 
-- `app/script.js:153` calls `/api/tutor`.
-- `app/script.js:188` calls `/api/tutor-request` for manual prompt generation.
-- `app/script.js:376` calls `/api/feedback`.
+- `app/script.js:151` calls `/api/tutor`.
+- `app/script.js:327` calls `/api/feedback`.
 - These frontend calls are relative paths, which is good for Render because the static frontend and Express API can be served from the same origin.
-- Developer Mode still uses Claude language in `app/index.html:171`, `app/index.html:177`, `app/index.html:178`, and `app/script.js:202-204`.
+- Developer Mode and the manual prompt bridge have been removed from the production UI.
 
 ### Nurse-tutor carryover
 
@@ -131,16 +130,21 @@ Acceptance checks:
 - `render.yaml` uses `kidtutor-web` or another KidTutor-owned service name.
 - Render config contains no nurse-tutor service names.
 
-### Phase 2: Clean obvious stale product copy
+### Phase 2: Production Visibility Cleanup
 
-1. Replace Developer Mode copy that says Claude with provider-neutral language such as "manual AI testing".
-2. Leave internal DOM ids such as `claudeAnswer` for a later cleanup if needed.
-3. Add a note that the production app currently uses the server API directly, while Developer Mode is only a manual prompt bridge.
+Cleanup name: `Production Visibility Cleanup`
+
+1. Remove the visible Developer Mode toggle and manual AI bridge from `app/index.html`.
+2. Remove unused Developer Mode frontend handlers from `app/script.js`.
+3. Remove Developer Mode styling from `app/style.css`.
+4. Remove the `/api/tutor-request` manual prompt bridge route from `server.js`.
+5. Keep the normal `/api/tutor`, `/api/feedback`, and `/healthz` routes unchanged.
 
 Acceptance checks:
 
-- User-visible app copy does not imply this is nurse-tutor or Claude-only.
-- `/api/tutor`, `/api/tutor-request`, and `/api/feedback` still work as before.
+- Production UI no longer shows Developer Mode or manual AI testing controls.
+- `/api/tutor`, `/api/feedback`, and `/healthz` still work as before.
+- `/api/tutor-request` is no longer available.
 
 ### Phase 3: Nursing Artifact Cleanup
 
@@ -163,7 +167,7 @@ Acceptance checks:
 
 - Repo search returns no active nurse-tutor runtime references.
 - Any retained historical artifact is clearly archived and not part of runtime setup.
-- `/api/tutor`, `/api/tutor-request`, `/api/feedback`, and `/healthz` behavior is unchanged.
+- `/api/tutor`, `/api/feedback`, and `/healthz` behavior is unchanged.
 - Validation passes with `git diff --check`; run `node --check server.js` and `node --check app\script.js` if any JavaScript changes are made.
 
 ### Phase 4: Deploy and verify on Render
@@ -306,7 +310,7 @@ Run after Render-first implementation:
 ## Open Questions
 
 - Which OpenAI model should be the production default for KidTutor cost and quality goals?
-- Should Developer Mode remain in production, be hidden behind an environment flag, or be removed?
+- Developer Mode decision: removed from production rather than hidden behind an environment flag.
 - Should feedback remain local for beta testing, or should we add durable storage now?
 - Do we want a separate staging Render service before production?
 

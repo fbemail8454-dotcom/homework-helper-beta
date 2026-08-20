@@ -55,8 +55,6 @@ function toggleCustomSubject() {
 function clearGeneratedOutputs() {
   document.getElementById('tutorOutput').value = '';
   document.getElementById('followUpOutput').value = '';
-  document.getElementById('tutorRequest').value = '';
-  document.getElementById('claudeAnswer').value = '';
   latestOutputId = 'tutorOutput';
   ['tutorOutput', 'followUpOutput'].forEach(id => {
     const btn = document.getElementById('saveBtn_' + id);
@@ -171,53 +169,6 @@ async function callTutor(payload, targetId) {
     target.value = 'Could not reach the Homework Helper server. Make sure it is running.';
     target.removeAttribute('readonly');
   }
-}
-
-async function prepareTutorRequest() {
-  const payload = getTutorPayload();
-  const error = validateTutorPayload(payload);
-  if (error) {
-    alert(error);
-    return;
-  }
-
-  const target = document.getElementById('tutorRequest');
-  target.value = 'Building request...';
-
-  try {
-    const response = await fetch('/api/tutor-request', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(payload)
-    });
-
-    const data = await response.json();
-    target.value = response.ok ? data.prompt : 'Something went wrong: ' + (data.error || 'Unknown error.');
-  } catch (err) {
-    target.value = 'Could not reach the Homework Helper server. Make sure it is running.';
-  }
-}
-
-function sendToExplanation() {
-  const raw = document.getElementById('claudeAnswer').value.trim();
-  if (!raw) {
-    alert('Please paste the manual AI answer first.');
-    return;
-  }
-
-  const target = document.getElementById('tutorOutput');
-  target.value = raw;
-  target.removeAttribute('readonly');
-  latestOutputId = 'tutorOutput';
-  target.scrollIntoView({ behavior: 'smooth' });
-}
-
-function copyText(elementId) {
-  const textArea = document.getElementById(elementId);
-  textArea.select();
-  textArea.setSelectionRange(0, 999999);
-  navigator.clipboard.writeText(textArea.value);
-  alert('Copied!');
 }
 
 function saveExplanation(sourceId, btn) {
@@ -408,18 +359,6 @@ function renderFeedbackLog() {
       ${entry.comment ? `<div><strong>Note:</strong> ${entry.comment}</div>` : ''}
     </div>
   `).join('');
-}
-
-function toggleDevMode() {
-  const container = document.getElementById('devModeContainer');
-  const btn = document.getElementById('devToggleBtn');
-  if (container.style.display === 'none') {
-    container.style.display = 'block';
-    btn.textContent = 'Hide Developer Mode';
-  } else {
-    container.style.display = 'none';
-    btn.textContent = 'Show Developer Mode';
-  }
 }
 
 function resetApp() {

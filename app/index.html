@@ -153,32 +153,6 @@
       <div id="feedbackLog" class="feedback-log"></div>
     </section>
 
-    <div class="dev-toggle-row">
-      <button id="devToggleBtn" onclick="toggleDevMode()">Show Developer Mode</button>
-    </div>
-
-    <div id="devModeContainer" style="display:none">
-      <div class="mode-header dev-header" id="devMode">Developer Mode - Manual AI Bridge</div>
-      <p class="step-note">This beta tool shows the backend-built prompt for manual testing.</p>
-
-      <section class="card dev-section">
-        <p class="step-note">Click to request the structured prompt from the server.</p>
-        <button onclick="prepareTutorRequest()">Prepare Homework Helper Request</button>
-      </section>
-
-      <section class="card dev-section">
-        <h2 class="dev-label">Tutor Request</h2>
-        <p class="step-note">Copy this and paste it into an AI tool for manual testing.</p>
-        <textarea id="tutorRequest" placeholder="Click Prepare Homework Helper Request above to build the prompt..."></textarea>
-        <button onclick="copyText('tutorRequest')">Copy Request</button>
-      </section>
-
-      <section class="card dev-section">
-        <h2 class="dev-label">Paste Manual AI Answer Here</h2>
-        <textarea id="claudeAnswer" placeholder="Paste the manual AI response here..."></textarea>
-        <button onclick="sendToExplanation()">Show Manual Answer</button>
-      </section>
-    </div>
   </main>
 
   <script src="script.js"></script>

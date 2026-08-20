@@ -438,15 +438,6 @@ app.post('/api/tutor', async (req, res) => {
   }
 });
 
-app.post('/api/tutor-request', (req, res) => {
-  try {
-    const tutorRequest = getTutorRequest(req.body || {});
-    return res.json({ prompt: buildPrompt(tutorRequest) });
-  } catch (err) {
-    return res.status(400).json({ error: err.message });
-  }
-});
-
 app.post('/api/feedback', (req, res) => {
   const entry = req.body;
   if (!entry || typeof entry !== 'object') {
