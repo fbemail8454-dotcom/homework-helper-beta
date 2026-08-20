@@ -142,16 +142,29 @@ Acceptance checks:
 - User-visible app copy does not imply this is nurse-tutor or Claude-only.
 - `/api/tutor`, `/api/tutor-request`, and `/api/feedback` still work as before.
 
-### Phase 3: Remove or archive nurse-tutor artifacts
+### Phase 3: Nursing Artifact Cleanup
+
+Cleanup name: `Nursing Artifact Cleanup`
+
+Purpose: remove stale nurse-tutor prompt artifacts from the KidTutor repo after the Render deployment is stable, without changing active Anthropic wiring, inline KidTutor prompt behavior, UI flow, or deployed service settings.
 
 1. Remove or archive nursing prompt files under `prompts/`.
-2. Add KidTutor-specific prompt files only if we decide to move inline server prompts out of `server.js`.
-3. Search again for `nurse`, `nursing`, and `clinical`.
+2. Target files identified by audit:
+   - `prompts/tutor_prompt_v1.txt`
+   - `prompts/ai_validator_prompt_v1.txt`
+   - `prompts/ai_review_prompt_v1.txt`
+3. If `prompts/` becomes empty, remove the empty folder from git.
+4. Leave KidTutor's active inline prompts in `server.js` unchanged.
+5. Add KidTutor-specific prompt files only if we later decide to move inline server prompts out of `server.js`.
+6. Search again for `nurse`, `nursing`, and `clinical`.
+7. Separately decide whether empty legacy placeholders in `docs/` and `test_cases/` should be deleted or repurposed.
 
 Acceptance checks:
 
 - Repo search returns no active nurse-tutor runtime references.
 - Any retained historical artifact is clearly archived and not part of runtime setup.
+- `/api/tutor`, `/api/tutor-request`, `/api/feedback`, and `/healthz` behavior is unchanged.
+- Validation passes with `git diff --check`; run `node --check server.js` and `node --check app\script.js` if any JavaScript changes are made.
 
 ### Phase 4: Deploy and verify on Render
 
