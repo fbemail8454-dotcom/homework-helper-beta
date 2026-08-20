@@ -1,170 +1,222 @@
 # New Session Restart Anchor
 
-This is a restart anchor only. It is not a project history log.
+This is a restart anchor only. It is not a full project history log.
 
-## Current Objective
+## Current Status
 
-Get KidTutor deployed as its own Render web service first, while keeping the current Anthropic API integration unchanged. Do not migrate to OpenAI during this deployment pass. Preserve the OpenAI migration roadmap for later.
+KidTutor is stable enough for light friend beta use. The user said this is not
+their main app build and is good for now while they work on other projects.
 
-## Current Repo State To Remember
+Do not assume there is an active KidTutor implementation task unless the user
+asks for one. If work resumes, start with a fresh repo/runtime check and a short
+plan before editing.
+
+## Current Git / Deploy Context
+
+- Repo path: `C:\Users\Chad\KidTutor`
+- Branch: `main`
+- Origin: `https://github.com/fbemail8454-dotcom/homework-helper-beta.git`
+- Live Render URL: `https://kidtutor-web.onrender.com`
+- Latest pushed commit at handoff: `168872e Tune student practice teacher presence`
+- Render service: `kidtutor-web`
+- Render Auto-Deploy should be set to `On Commit`, but recent pushes sometimes
+  needed manual deploy. If a future push does not appear in Render, use
+  `Manual Deploy -> Deploy latest commit`.
+- `CODEX.md` may be present as an untracked local file. Do not stage or commit it
+  unless the user explicitly asks.
+
+Recent completed commits:
+
+```text
+168872e Tune student practice teacher presence
+a8f7a10 Add prompt routing architecture
+91c67ba Clean up reply workflow
+6ab7839 Add guided follow-up upgrade
+b491807 Remove production developer mode
+a3b08aa Remove stale nursing prompt artifacts
+00f913a Add KidTutor evaluation handoff
+```
+
+## Current App Shape
 
 - App: Express server plus static frontend.
 - Main server: `server.js`
 - Frontend: `app/index.html`, `app/script.js`, `app/style.css`
 - Deployment config: `render.yaml`
 - Roadmap: `roadmap.md`
-- Local env example: `.env.example`
 - Current AI provider: Anthropic.
-- Current required secret: `ANTHROPIC_API_KEY`
-- Current optional model var: `ANTHROPIC_MODEL`
+- Required secret: `ANTHROPIC_API_KEY`
+- Optional model var: `ANTHROPIC_MODEL`
 - Current default model in code: `claude-sonnet-4-6`
-- OpenAI is planned later, not part of the first Render setup.
+- OpenAI migration remains a later roadmap item, not active now.
 
-## Codex Evaluation Context
+Modes:
 
-Read-only app evaluation completed from the repo root on 2026-08-13.
+- Parent Mode
+- Student Mode
+- Curiosity Mode
 
-Evaluation summary:
+Current Student follow-up workflow:
 
-- KidTutor is currently a small Homework Helper MVP, not a Lorekee-scale study
-  workspace.
-- Current modes are Parent Mode, Student Mode, and Curiosity Mode.
-- The app already has grade level, subject/custom subject, homework/topic text,
-  "what are you stuck on?", simple follow-up buttons, response/session
-  downloads, quick feedback, and a developer/manual prompt bridge.
-- Active runtime prompts are inline in `server.js`.
-- The old nursing prompt files in `prompts/` are stale artifacts and do not
-  appear to be imported by `server.js`.
-- The app is not yet connected to OpenAI. The roadmap already preserves the
-  provider/deployment plan.
-- Future enhancement work should compare against Lorekee lessons learned, but
-  KidTutor should stay much lighter and simpler.
-- Before judging safety, minors, or enhancement scope, inspect the actual app
-  behavior and repo state first.
+- Action-first section: `Choose what you want next`
+- Seven actions:
+  - Answer KidTutor's Question
+  - Check My Answer
+  - Make It Clearer
+  - Give Me a Hint
+  - Explain This Step
+  - Try Another Example
+  - More Practice
+- Reply field: `Reply to KidTutor`
+- Save section: `Save your work`
+- Session downloads include homework, main response, learner/parent reply,
+  follow-up action, and follow-up response.
 
-Potential future enhancement eval should report:
+## Prompt / Quality State
 
-- what KidTutor should borrow from Lorekee
-- what KidTutor should deliberately avoid
-- what belongs in a lightweight K-12 roadmap
-- which stale artifacts or provider leftovers should be cleaned before larger
-  work
+Active runtime prompts are inline in `server.js`.
 
-## Changes Already Prepared For Render
+Student Practice now has explicit prompt routing:
 
-- `server.js` has a `/healthz` endpoint.
-- `render.yaml` defines a Render web service named `kidtutor-web`.
-- `render.yaml` uses:
-  - `runtime: node`
-  - `buildCommand: npm install`
-  - `startCommand: npm start`
-  - `healthCheckPath: /healthz`
-  - `ANTHROPIC_API_KEY` with `sync: false`
-  - `ANTHROPIC_MODEL=claude-sonnet-4-6`
-  - `NODE_ENV=production`
-- `package.json` pins Node compatibility with `"node": ">=18"`.
-- README has Render setup instructions.
-- Visible Developer Mode copy no longer says Claude; internal DOM id `claudeAnswer` still exists and can be cleaned later.
+- grade band
+- subject family
+- task shape
 
-## Verified Locally
+Initial grade bands:
 
-These checks passed:
+- Early elementary: Pre-K through 2nd grade.
+- Upper elementary: 3rd through 5th grade.
+- Middle school: 6th through 8th grade.
+- High school/adult: High school and GED / Adult Learning.
+
+Initial subject families:
+
+- Math
+- Science
+- Reading
+- Writing
+- Social Studies
+- Other/custom
+
+Initial task shapes:
+
+- procedural equation
+- rate-of-change math
+- math word problem
+- math practice
+- concept explanation
+- reading comprehension
+- writing revision
+- writing planning
+- evidence-based explanation
+- answer checking
+- learner explanation
+- general learning
+
+`Teacher Presence Tuning` is installed. It is intentionally narrow:
+
+- Student Practice only, plus shared follow-up wording.
+- High-school/adult tone should be concise but not abrupt.
+- Math can state current-step closure when the learner has the pieces.
+- Rate-of-change/velocity math routes separately from equation solving.
+- `Make It Clearer` means easier to learn from, not merely shorter.
+- Parent Guide and Curiosity prompt shapes were not redesigned.
+
+## Testing / Validation State
+
+`package.json` defines:
 
 ```text
-npm install
+npm test
 ```
 
-Result: clean install, 0 vulnerabilities.
-
-The health endpoint passed locally:
+Current `npm test` runs:
 
 ```text
-http://localhost:3107/healthz
+node --check server.js
+node --check app/script.js
+node test_cases/prompt_architecture_smoke.js
 ```
 
-Expected body:
+Prompt smoke coverage has 11 cases, including:
 
-```json
-{"ok":true,"service":"kidtutor"}
-```
+- high-school algebra
+- elementary division
+- middle-school science
+- reading
+- writing
+- social studies
+- answer-question follow-up
+- check-answer follow-up
+- high-school calculus/rate-of-change
+- GED/adult writing
+- clearer follow-up teacher-presence case
+
+Latest live Render quality sweep after `168872e`:
+
+- 16 live model calls
+- 13 Pass
+- 3 Watch
+- 0 Fail
+
+Watch items from the sweep:
+
+- High-school calculus is improved but can still be cautious about stating the
+  final current-step expression.
+- Parent Mode science was accurate but long.
+- `Make It Clearer` improved, but current-step closure should continue to be
+  watched in real saved sessions.
+
+User decision after sweep: good for now. Do not keep tuning from a single
+awkward response unless a repeatable pattern appears.
 
 ## Important Guardrails
 
-- Do not reuse nurse-tutor Render services, env groups, or secrets.
-- Do not commit real API keys.
-- Do not remove the OpenAI roadmap.
-- Do not switch to OpenAI until the Render deployment is stable.
-- Feedback currently writes to local `feedback/feedback.json`; this is acceptable for beta testing but not durable production storage on Render.
-- Old nursing prompt files may still exist under `prompts/`; remove/archive later as cleanup, but they are not needed for the first Render deployment.
+- Do not commit secrets.
+- Do not reuse nurse-tutor Render services, environment groups, or secrets.
+- Do not switch to OpenAI unless the user explicitly starts that migration.
+- Do not overbuild KidTutor; it is a lightweight helper for a few friends.
+- Feedback currently writes to local `feedback/feedback.json`, which is not
+  durable on Render unless a persistent disk or database is added.
+- If editing, keep changes narrow and run relevant checks.
+- If pushing, user has said push is approved when they explicitly say push, but
+  still stage only intended files and keep `CODEX.md` out unless requested.
 
-## Next Best Step
+## Remaining Roadmap Items
 
-The Render-readiness changes are approved for commit and push to GitHub `main`. After that, create the new Render service from that branch.
+Not urgent unless the user resumes KidTutor work:
 
-Current known Git context:
+1. Feedback Storage Decision
+   - Keep local feedback for beta only, or move to persistent disk/database.
+   - Add basic validation and size limits if production feedback collection
+     matters.
+2. OpenAI Migration
+   - Add OpenAI SDK and `OPENAI_API_KEY` / `OPENAI_MODEL`.
+   - Replace Anthropic call path while keeping `/api/tutor` returning `{ text }`.
+   - Retest all modes and follow-ups.
+3. Ongoing Verification
+   - `npm test`
+   - local startup
+   - Parent / Student / Curiosity checks
+   - follow-up checks
+   - `/healthz`
+   - Render deploy status
 
-```text
-branch: main
-origin: https://github.com/fbemail8454-dotcom/homework-helper-beta.git
-```
+## Suggested Restart Procedure
 
-Before committing, run:
+When a future session starts:
 
 ```text
 git status --short
-git diff --stat
+git branch --show-current
+git log -1 --oneline
+npm test
 ```
 
-Expected relevant changed/new files:
+If checking production:
 
 ```text
-README.md
-app/index.html
-app/script.js
-package-lock.json
-package.json
-server.js
-render.yaml
-roadmap.md
-newsession.md
-```
-
-There may also be an untracked `CODEX.md`; it was not part of this Render task unless the user asks to include it.
-
-Commit message:
-
-```text
-Prepare KidTutor Render deployment
-```
-
-After the push, the next session should start at the Render dashboard setup step.
-
-## Render Dashboard Guided Setup
-
-Use the Render Blueprint flow if Render detects `render.yaml`. If setting up manually, use:
-
-```text
-Service type: Web Service
-Service name: kidtutor-web
-Runtime: Node
-Build command: npm install
-Start command: npm start
-Health check path: /healthz
-Branch: main
-```
-
-Add environment variables on the KidTutor service only:
-
-```text
-ANTHROPIC_API_KEY=<real Anthropic key>
-ANTHROPIC_MODEL=claude-sonnet-4-6
-NODE_ENV=production
-```
-
-After deploy, open:
-
-```text
-https://your-render-url.onrender.com/healthz
+https://kidtutor-web.onrender.com/healthz
 ```
 
 Expected:
@@ -173,19 +225,6 @@ Expected:
 {"ok":true,"service":"kidtutor"}
 ```
 
-Then smoke test:
-
-1. Parent Mode response.
-2. Student Mode response.
-3. Curiosity Mode response.
-4. One follow-up button.
-5. One feedback save.
-
-## After Render Is Stable
-
-Next roadmap choices:
-
-1. Decide whether to archive/remove old nursing prompt files.
-2. Decide whether Developer Mode should remain visible in production.
-3. Decide durable feedback storage before collecting real production feedback.
-4. Later: migrate from Anthropic to OpenAI using the preserved plan in `roadmap.md`.
+If the user asks what to do next, recommend pausing KidTutor unless real beta
+feedback points to a problem. If they want a practical next KidTutor item,
+recommend `Feedback Storage Decision` before model/provider migration.
