@@ -10,10 +10,6 @@ const PORT = process.env.PORT || 3000;
 const apiKey = process.env.ANTHROPIC_API_KEY?.trim();
 const model = process.env.ANTHROPIC_MODEL?.trim() || 'claude-sonnet-4-6';
 
-if (!apiKey) {
-  console.warn('WARNING: ANTHROPIC_API_KEY is missing from .env');
-}
-
 app.use(express.json({ limit: '1mb' }));
 app.use(express.static(path.join(__dirname, 'app')));
 
@@ -150,6 +146,224 @@ function getToneGuidance(gradeLevel) {
   return 'concise, academic, and respectful. Do not use emojis, childish praise, babyish wording, or phrases like "you have got this" or "superstar".';
 }
 
+function getGradeBand(gradeLevel) {
+  const grade = getGradeNumber(gradeLevel);
+
+  if (grade <= 2) return 'early-elementary';
+  if (grade <= 5) return 'upper-elementary';
+  if (grade <= 8) return 'middle-school';
+  return 'high-school-adult';
+}
+
+function getSubjectFamily(subject) {
+  const normalized = String(subject || '').toLowerCase();
+
+  if (/\b(math|algebra|geometry|calculus|trig|trigonometry|equation|arithmetic|number|fraction|decimal|percent|statistics|probability)\b/.test(normalized)) {
+    return 'math';
+  }
+
+  if (/\b(science|biology|chemistry|physics|earth|space|astronomy|geology|ecology|energy|heat|force|motion|quantum)\b/.test(normalized)) {
+    return 'science';
+  }
+
+  if (/\b(reading|literature|book|story|novel|poem|poetry|comprehension|ela)\b/.test(normalized)) {
+    return 'reading';
+  }
+
+  if (/\b(writing|essay|paragraph|grammar|sentence|revision|revise|composition|draft)\b/.test(normalized)) {
+    return 'writing';
+  }
+
+  if (/\b(social studies|history|civics|government|geography|economics)\b/.test(normalized)) {
+    return 'social-studies';
+  }
+
+  return 'other';
+}
+
+function getTaskShape(request) {
+  const subjectFamily = getSubjectFamily(request.subject);
+  const text = [
+    request.homeworkText,
+    request.struggleText,
+    request.followUpText
+  ].filter(Boolean).join(' ').toLowerCase();
+
+  if (request.followUpType === 'check-answer') return 'answer-checking';
+  if (request.followUpType === 'answer-question') return 'learner-explanation';
+
+  if (subjectFamily === 'math') {
+    const hasEquation = /=/.test(text) || /\b(solve for|equation|isolate|simplify|combine like terms)\b/.test(text);
+    const hasVariable = /[a-z]/i.test(request.homeworkText || '') || /\bvariable\b/.test(text);
+
+    if (hasEquation && hasVariable) return 'procedural-equation';
+
+    if (/\b(word problem|how many|how much|total|altogether|left|remaining|each|groups?|share|per|rate|ratio|percent)\b/.test(text)) {
+      return 'math-word-problem';
+    }
+
+    if (/\b(explain|why|concept|what is|difference between|understand)\b/.test(text)) {
+      return 'concept-explanation';
+    }
+
+    return 'math-practice';
+  }
+
+  if (subjectFamily === 'science') return 'concept-explanation';
+  if (subjectFamily === 'reading') return 'reading-comprehension';
+
+  if (subjectFamily === 'writing') {
+    if (/\b(revise|edit|improve|draft|paragraph|essay|grammar|sentence)\b/.test(text)) {
+      return 'writing-revision';
+    }
+
+    return 'writing-planning';
+  }
+
+  if (subjectFamily === 'social-studies') return 'evidence-explanation';
+
+  return 'general-learning';
+}
+
+function getPromptRouting(request) {
+  return {
+    gradeBand: getGradeBand(request.gradeLevel),
+    subjectFamily: getSubjectFamily(request.subject),
+    taskShape: getTaskShape(request)
+  };
+}
+
+function buildGradeBandStrategy(gradeBand) {
+  const strategies = {
+    'early-elementary': `Grade-band strategy:
+- Use one tiny step at a time.
+- Use concrete objects, counting, drawing, or everyday examples when helpful.
+- Avoid formal vocabulary unless the assignment clearly uses it.
+- Ask for one small action or thought before moving on.`,
+    'upper-elementary': `Grade-band strategy:
+- Use clear, plain school vocabulary.
+- Keep steps short, but start naming the important skill.
+- Use one quick example or model only when it helps the next move.
+- Invite the learner to explain the next step in their own words.`,
+    'middle-school': `Grade-band strategy:
+- Stay direct, respectful, and efficient.
+- Use correct subject vocabulary with a quick explanation.
+- Focus on the next reasoning move, not a long mini-lesson.
+- Ask one targeted follow-up question.`,
+    'high-school-adult': `Grade-band strategy:
+- Use concise academic language.
+- Use accurate subject terms without babying the learner.
+- Give the first concrete move when the learner asks where to start.
+- Keep examples minimal and closely matched to the original task.`
+  };
+
+  return strategies[gradeBand] || strategies['upper-elementary'];
+}
+
+function buildSubjectStrategy(routing) {
+  const strategies = {
+    math: `Subject strategy for Math:
+- Identify the mathematical structure before choosing an example.
+- For high school or adult math, use precise terms such as "distribute," "combine like terms," and "isolate the variable" when they are the right terms.
+- For elementary math, use concrete actions and visual models before formal terms.
+- Do not give the final original answer unless the learner is checking work or explicitly asks for a check.`,
+    science: `Subject strategy for Science:
+- Keep explanations concept-first.
+- Name the process, cause, or relationship behind the question.
+- Use analogies only when they clarify the concept.
+- Point out one likely misconception when it would prevent understanding.`,
+    reading: `Subject strategy for Reading:
+- Help the learner find meaning in the text rather than inventing an answer.
+- Focus on evidence, main idea, inference, vocabulary, or author's purpose as appropriate.
+- Ask for one piece of text evidence when the task calls for support.`,
+    writing: `Subject strategy for Writing:
+- Preserve the learner's own voice.
+- Help with one writing move at a time: idea, organization, sentence clarity, evidence, or revision.
+- Offer model wording only as a small example, not a replacement for the learner's work.`,
+    'social-studies': `Subject strategy for Social Studies:
+- Anchor explanations in cause/effect, chronology, geography, civic ideas, or evidence.
+- Avoid unsupported claims.
+- Help the learner connect facts to the question being asked.`,
+    other: `Subject strategy for Other/custom subjects:
+- Use the stated subject as context.
+- Choose the most relevant learning pattern from the problem text.
+- Keep the response guided, concrete, and grade-appropriate.`
+  };
+
+  return strategies[routing.subjectFamily] || strategies.other;
+}
+
+function buildTaskShapeStrategy(routing) {
+  const strategies = {
+    'procedural-equation': `Task-shape strategy for procedural equations:
+- If the learner asks where to start, show the first required move on the original problem.
+- Do not solve the full equation immediately.
+- Use a smaller example only if the first move still seems unclear.
+- Keep any example tightly matched to the original operation.`,
+    'math-word-problem': `Task-shape strategy for math word problems:
+- Help identify what is known, what is being asked, and the operation or relationship.
+- Do not compute the final original answer before the learner tries the setup.
+- For elementary learners, use drawing or grouping when it matches the problem.`,
+    'math-practice': `Task-shape strategy for math practice:
+- Name the skill and guide the next step.
+- Use one short practice item only when it helps the learner attempt the original task.`,
+    'concept-explanation': `Task-shape strategy for conceptual explanation:
+- Name the big idea first.
+- Explain the cause, relationship, or rule in a few short layers.
+- Ask one check-for-understanding question.`,
+    'reading-comprehension': `Task-shape strategy for reading comprehension:
+- Ask what the text says first.
+- Then guide inference, theme, main idea, or evidence.
+- Do not write the full response for the learner.`,
+    'writing-revision': `Task-shape strategy for writing revision:
+- Identify one high-value revision target.
+- Suggest a small change and explain why it helps.
+- Keep the learner's ownership of the final wording.`,
+    'writing-planning': `Task-shape strategy for writing planning:
+- Help choose a claim, idea order, or supporting detail.
+- Ask for one next sentence or idea before drafting more.`,
+    'evidence-explanation': `Task-shape strategy for evidence-based explanation:
+- Separate facts from interpretation.
+- Help connect evidence to the question.
+- Ask for one reason or example the learner can defend.`,
+    'answer-checking': `Task-shape strategy for answer checking:
+- Evaluate the learner's attempt first.
+- Say what is correct before naming the first mistake.
+- Guide the next correction step without dumping the final answer.`,
+    'learner-explanation': `Task-shape strategy for learner explanations:
+- Treat the learner's reply as an attempted explanation.
+- Confirm what is on track.
+- Refine one unclear or incomplete part.`,
+    'general-learning': `Task-shape strategy for general learning:
+- Find the smallest useful next move.
+- Keep the response concrete.
+- Ask one natural follow-up question.`
+  };
+
+  return strategies[routing.taskShape] || strategies['general-learning'];
+}
+
+function buildStudentPracticeRoutingBlock(request) {
+  const routing = getPromptRouting(request);
+
+  return `Instructional routing for this response only. Do not mention these labels to the learner.
+- Mode: Student Practice
+- Grade band: ${routing.gradeBand}
+- Subject family: ${routing.subjectFamily}
+- Task shape: ${routing.taskShape}
+
+${buildGradeBandStrategy(routing.gradeBand)}
+
+${buildSubjectStrategy(routing)}
+
+${buildTaskShapeStrategy(routing)}
+
+Routing priority:
+- Follow the mode first, then grade band, then subject strategy, then task shape.
+- Subject, grade, and task-shape strategies override the default Student Practice flow when they conflict.
+- Keep the response coherent; do not expose this routing plan.`;
+}
+
 function buildParentGuidePrompt(request) {
   const parentName = request.parentName || 'the parent or helper';
   const followUp = buildFollowUpInstruction(request);
@@ -211,6 +425,7 @@ ${followUp}`;
 function buildKidPracticePrompt(request) {
   const followUp = buildFollowUpInstruction(request);
   const toneGuidance = getToneGuidance(request.gradeLevel);
+  const routingBlock = buildStudentPracticeRoutingBlock(request);
 
   return `You are Homework Helper, a tutor speaking directly to ${request.childName}.
 
@@ -220,11 +435,13 @@ Tone for grade ${request.gradeLevel}: ${toneGuidance}
 
 ${buildBaseContext(request)}
 
-Student Practice flow:
+${routingBlock}
+
+Student Practice default flow:
 Start with exactly: "Let's try this together!"
 Then write in a natural flow, like you are sitting with ${request.childName}. No titles, headers, markdown sections, or "---" separators.
 
-Use this order without labeling the parts:
+Use this order without labeling the parts unless the instructional routing above gives a more specific order:
 1. Start with one small thing ${request.childName} can notice, try, or think about right away. For math that needs a visual model, this can be a drawing step.
 2. Give a very short explanation in 1 or 2 short sentences. Use natural wording, such as "We are sharing into equal groups!"
 3. For a word problem, help ${request.childName} name the total amount, the group size or number of groups, and what each question asks. Do not compute the original final answers yet.
@@ -246,6 +463,7 @@ Rules:
 - Make the response feel like real-time tutoring, not a worksheet or handout.
 - Keep the whole response about 25 percent shorter than a typical lesson response.
 - Use short sentences and only essential explanation.
+- Apply the instructional routing above when it conflicts with the default flow.
 - Do not solve the original homework immediately.
 - Guide the setup first, then use smaller similar examples.
 - For multi-part word problems, identify the total amount, the group size or number of groups, and what each question asks.
@@ -270,10 +488,10 @@ Rules:
 - Do not write dense paragraph blocks.
 - Use blank lines to keep action steps easy to read.
 - Keep sentences short, about 5 to 8 words when possible.
-- Do not use these words: "deal", "distribute", or "allocate".
+- For elementary sharing/division prompts, avoid vague adult words like "deal" or "allocate".
 - Do not use the phrase "Division means".
 - Use natural wording like "We are sharing into equal groups!" instead.
-- Prefer simple action words: "put", "draw", "count", "circle", and "mark".
+- For early elementary drawing or sharing tasks, prefer simple action words: "put", "draw", "count", "circle", and "mark".
 - HARD DRAWING RULE: When using circles and dots, copy these exact four lines with no variation except numbers:
   "Draw X circles."
   "Put 1 dot in each circle."
@@ -494,8 +712,35 @@ app.post('/api/feedback', (req, res) => {
   }
 });
 
-app.listen(PORT, () => {
-  console.log(`Homework Helper server running at http://localhost:${PORT}`);
-  console.log(`Model: ${model}`);
-  console.log(`API key loaded: ${apiKey ? 'YES' : 'NO'}`);
-});
+if (require.main === module) {
+  if (!apiKey) {
+    console.warn('WARNING: ANTHROPIC_API_KEY is missing from .env');
+  }
+
+  app.listen(PORT, () => {
+    console.log(`Homework Helper server running at http://localhost:${PORT}`);
+    console.log(`Model: ${model}`);
+    console.log(`API key loaded: ${apiKey ? 'YES' : 'NO'}`);
+  });
+}
+
+module.exports = {
+  app,
+  cleanField,
+  normalizeHomeworkText,
+  normalizeMode,
+  getTutorRequest,
+  buildBaseContext,
+  getGradeNumber,
+  getToneGuidance,
+  getGradeBand,
+  getSubjectFamily,
+  getTaskShape,
+  getPromptRouting,
+  buildStudentPracticeRoutingBlock,
+  buildFollowUpInstruction,
+  buildParentGuidePrompt,
+  buildKidPracticePrompt,
+  buildCuriosityPrompt,
+  buildPrompt
+};

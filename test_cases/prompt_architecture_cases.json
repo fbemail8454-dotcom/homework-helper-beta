@@ -1,0 +1,192 @@
+[
+  {
+    "name": "high_school_algebra_where_to_start",
+    "request": {
+      "mode": "kid-practice",
+      "childName": "Jack",
+      "gradeLevel": "High school",
+      "subject": "Math",
+      "homeworkText": "Solve for x: 3(2x - 7) - 4(x + 5) = 2(3x - 1) - 9",
+      "struggleText": "where to start?"
+    },
+    "expect": {
+      "gradeBand": "high-school-adult",
+      "subjectFamily": "math",
+      "taskShape": "procedural-equation",
+      "includes": [
+        "Grade band: high-school-adult",
+        "Subject family: math",
+        "Task shape: procedural-equation",
+        "Subject strategy for Math",
+        "Task-shape strategy for procedural equations",
+        "use precise terms such as \"distribute,\""
+      ],
+      "excludes": [
+        "Do not use these words: \"deal\", \"distribute\", or \"allocate\""
+      ]
+    }
+  },
+  {
+    "name": "early_elementary_division_word_problem",
+    "request": {
+      "mode": "kid-practice",
+      "childName": "Ava",
+      "gradeLevel": "2nd grade",
+      "subject": "Math",
+      "homeworkText": "Ava has 12 cookies. She shares them equally into 3 groups. How many cookies are in each group?",
+      "struggleText": "I do not know how to show it."
+    },
+    "expect": {
+      "gradeBand": "early-elementary",
+      "subjectFamily": "math",
+      "taskShape": "math-word-problem",
+      "includes": [
+        "Grade band: early-elementary",
+        "Subject family: math",
+        "Task shape: math-word-problem",
+        "For elementary math, use concrete actions and visual models",
+        "HARD DRAWING RULE"
+      ]
+    }
+  },
+  {
+    "name": "middle_school_science_concept",
+    "request": {
+      "mode": "kid-practice",
+      "childName": "Jordan",
+      "gradeLevel": "8th grade",
+      "subject": "Science",
+      "homeworkText": "A cold metal spoon is placed in hot tea. Explain what type of heat transfer occurs.",
+      "struggleText": "because it is touching the hot liquid"
+    },
+    "expect": {
+      "gradeBand": "middle-school",
+      "subjectFamily": "science",
+      "taskShape": "concept-explanation",
+      "includes": [
+        "Grade band: middle-school",
+        "Subject family: science",
+        "Task shape: concept-explanation",
+        "Subject strategy for Science",
+        "Task-shape strategy for conceptual explanation"
+      ]
+    }
+  },
+  {
+    "name": "upper_elementary_reading_comprehension",
+    "request": {
+      "mode": "kid-practice",
+      "childName": "Mia",
+      "gradeLevel": "5th grade",
+      "subject": "Reading",
+      "homeworkText": "Read the passage and explain the main idea using one detail from the text.",
+      "struggleText": "finding the detail"
+    },
+    "expect": {
+      "gradeBand": "upper-elementary",
+      "subjectFamily": "reading",
+      "taskShape": "reading-comprehension",
+      "includes": [
+        "Grade band: upper-elementary",
+        "Subject family: reading",
+        "Task shape: reading-comprehension",
+        "Subject strategy for Reading",
+        "Task-shape strategy for reading comprehension"
+      ]
+    }
+  },
+  {
+    "name": "high_school_writing_revision",
+    "request": {
+      "mode": "kid-practice",
+      "childName": "Sam",
+      "gradeLevel": "High school",
+      "subject": "Writing",
+      "homeworkText": "Revise this paragraph so the claim is clearer and the evidence connects better.",
+      "struggleText": "my teacher says it is too vague"
+    },
+    "expect": {
+      "gradeBand": "high-school-adult",
+      "subjectFamily": "writing",
+      "taskShape": "writing-revision",
+      "includes": [
+        "Grade band: high-school-adult",
+        "Subject family: writing",
+        "Task shape: writing-revision",
+        "Subject strategy for Writing",
+        "Task-shape strategy for writing revision"
+      ]
+    }
+  },
+  {
+    "name": "middle_school_social_studies_evidence",
+    "request": {
+      "mode": "kid-practice",
+      "childName": "Lee",
+      "gradeLevel": "7th grade",
+      "subject": "Social Studies",
+      "homeworkText": "Explain one cause of the American Revolution and use evidence from class notes.",
+      "struggleText": "connecting cause and evidence"
+    },
+    "expect": {
+      "gradeBand": "middle-school",
+      "subjectFamily": "social-studies",
+      "taskShape": "evidence-explanation",
+      "includes": [
+        "Grade band: middle-school",
+        "Subject family: social-studies",
+        "Task shape: evidence-explanation",
+        "Subject strategy for Social Studies",
+        "Task-shape strategy for evidence-based explanation"
+      ]
+    }
+  },
+  {
+    "name": "science_answer_question_follow_up",
+    "request": {
+      "mode": "kid-practice",
+      "childName": "Jordan",
+      "gradeLevel": "8th grade",
+      "subject": "Science",
+      "homeworkText": "Explain heat transfer when a spoon warms in tea.",
+      "struggleText": "what kind of heat transfer",
+      "previousAnswer": "Heat moves from warmer things to cooler things through direct contact.",
+      "followUpType": "answer-question",
+      "followUpText": "It is conduction because the spoon is touching the tea."
+    },
+    "expect": {
+      "gradeBand": "middle-school",
+      "subjectFamily": "science",
+      "taskShape": "learner-explanation",
+      "includes": [
+        "Task shape: learner-explanation",
+        "Task-shape strategy for learner explanations",
+        "For answer-question, respond to the reply as an attempted explanation"
+      ]
+    }
+  },
+  {
+    "name": "math_check_answer_follow_up",
+    "request": {
+      "mode": "kid-practice",
+      "childName": "Jack",
+      "gradeLevel": "High school",
+      "subject": "Math",
+      "homeworkText": "Solve for x: 2x + 4 = 12",
+      "struggleText": "checking my work",
+      "previousAnswer": "Start by undoing addition, then division.",
+      "followUpType": "check-answer",
+      "followUpText": "2x + 4 = 12, 2x = 8, x = 4"
+    },
+    "expect": {
+      "gradeBand": "high-school-adult",
+      "subjectFamily": "math",
+      "taskShape": "answer-checking",
+      "includes": [
+        "Task shape: answer-checking",
+        "Task-shape strategy for answer checking",
+        "For check-answer, evaluate the attempted work"
+      ]
+    }
+  }
+]

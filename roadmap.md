@@ -17,14 +17,14 @@ Move KidTutor off all nurse-tutor and Anthropic/Claude-era wiring, then standard
 - `server.js:8` uses `process.env.PORT || 3000`, which is compatible with Render's dynamic port model.
 - `render.yaml` now captures the KidTutor Render web service configuration.
 - `server.js` now exposes `/healthz` for Render HTTP health checks.
-- `package.json` only defines `npm start`, with no test, lint, or deployment validation scripts.
+- `package.json` defines `npm start` and a lightweight `npm test` prompt-architecture smoke check.
 - Feedback is written to local disk at `feedback/feedback.json`. This is fine for local beta testing, but it is not a durable production storage plan on Render unless a persistent disk or external datastore is added.
 
 ### AI provider setup
 
 - `server.js:10-11` reads `ANTHROPIC_API_KEY` and `ANTHROPIC_MODEL`.
-- `server.js:407-446` calls `https://api.anthropic.com/v1/messages` directly with Anthropic-specific headers.
-- `server.js:453-460` sends generated tutor prompts to the Anthropic call path through `/api/tutor`.
+- `server.js:625-664` calls `https://api.anthropic.com/v1/messages` directly with Anthropic-specific headers.
+- `server.js:671-678` sends generated tutor prompts to the Anthropic call path through `/api/tutor`.
 - `.env.example` documents only `ANTHROPIC_API_KEY` and `ANTHROPIC_MODEL`.
 - `README.md` documents Anthropic setup and model defaults.
 - `package.json` has no `openai` package dependency.
@@ -311,7 +311,80 @@ Acceptance checks:
 - Session downloads include reply text, selected action, and follow-up response.
 - Normal Parent Mode, Student Mode, Curiosity Mode, feedback, and health checks still work.
 
-### Phase 7: Decide feedback storage before production traffic
+### Phase 7: Mode + Subject + Grade Prompt Architecture
+
+Feature name: `Mode + Subject + Grade Prompt Architecture`
+
+Purpose: make prompt tuning safer by routing Student Practice behavior through explicit mode, grade-band, subject-family, and task-shape strategies instead of adding more one-off rules to one global prompt.
+
+Implementation scope:
+
+1. Keep the existing frontend and `/api/tutor` request contract unchanged.
+2. Add server-side prompt classification helpers:
+   - `getGradeBand(gradeLevel)`
+   - `getSubjectFamily(subject)`
+   - `getTaskShape(request)`
+   - `getPromptRouting(request)`
+3. Compose Student Practice prompts from:
+   - shared context and safety rules
+   - mode strategy
+   - grade-band strategy
+   - subject-family strategy
+   - task-shape strategy
+   - follow-up action rules
+4. Start with Student Practice only. Preserve Parent Guide and Curiosity Mode prompt shapes except for existing shared follow-up behavior.
+5. Keep high-school math free to use correct math vocabulary such as `distribute`, while keeping elementary sharing/drawing language simple.
+6. Add prompt architecture smoke coverage that checks classification and prompt composition without calling the model.
+7. Keep the Anthropic provider unchanged.
+
+Initial grade bands:
+
+- Early elementary: Pre-K through 2nd grade.
+- Upper elementary: 3rd through 5th grade.
+- Middle school: 6th through 8th grade.
+- High school/adult: High school and GED / Adult Learning.
+
+Initial subject families:
+
+- Math
+- Science
+- Reading
+- Writing
+- Social Studies
+- Other/custom
+
+Initial task shapes:
+
+- procedural equation
+- math word problem
+- math practice
+- concept explanation
+- reading comprehension
+- writing revision
+- writing planning
+- evidence-based explanation
+- answer checking
+- learner explanation
+- general learning
+
+Acceptance checks:
+
+- `npm test` passes.
+- `node --check server.js` passes.
+- `node --check app\script.js` passes.
+- `git diff --check` passes.
+- Prompt smoke cases cover high-school algebra, elementary division, middle-school science, reading, writing, social studies, answer-question follow-up, and check-answer follow-up.
+- Student Practice prompts include explicit grade-band, subject-family, and task-shape routing.
+- Parent Guide, Curiosity Mode, `/api/tutor`, `/api/feedback`, and `/healthz` remain compatible.
+
+Risk assessment:
+
+- Code risk: Low to Medium.
+- Prompt quality risk: Medium, because model responses can shift even when routing is correct.
+- UI risk: Low, because this phase does not change the visible workflow.
+- Deployment risk: Low, because Render service configuration and provider integration stay unchanged.
+
+### Phase 8: Decide feedback storage before production traffic
 
 1. For beta-only use, keep local feedback and document that Render instances may not preserve it reliably.
 2. For production, move feedback to a durable store before relying on it.
@@ -323,7 +396,7 @@ Acceptance checks:
 - Product owner chooses `local beta`, `persistent disk`, or `database`.
 - README clearly explains where feedback goes.
 
-### Phase 8: OpenAI migration track
+### Phase 9: OpenAI migration track
 
 Keep this plan ready, but do not block the first Render deployment on it.
 
@@ -340,19 +413,20 @@ Acceptance checks:
 - Error responses do not expose secrets.
 - Follow-up prompts still work through the same endpoint.
 
-### Phase 9: Verification checklist
+### Phase 10: Verification checklist
 
 Run after Render-first implementation:
 
 1. `npm install`
-2. `npm start`
-3. Open `http://localhost:3000`
-4. Test Parent Mode, Student Mode, and Curiosity Mode.
-5. Test follow-up buttons.
-6. Test `/healthz`.
-7. Search for stale nurse-tutor references:
+2. `npm test`
+3. `npm start`
+4. Open `http://localhost:3000`
+5. Test Parent Mode, Student Mode, and Curiosity Mode.
+6. Test follow-up buttons.
+7. Test `/healthz`.
+8. Search for stale nurse-tutor references:
    - `rg -n -i "nurse|nursing|clinical|onrender|render"`
-8. Confirm `render.yaml` has no secrets.
+9. Confirm `render.yaml` has no secrets.
 
 ## Open Questions
 
@@ -360,7 +434,8 @@ Run after Render-first implementation:
 - Developer Mode decision: removed from production rather than hidden behind an environment flag.
 - Should feedback remain local for beta testing, or should we add durable storage now?
 - Do we want a separate staging Render service before production?
+- Should prompt routing later extend Parent Guide and Curiosity Mode, or remain Student Practice focused?
 
 ## Recommended Next Move
 
-After the Render deployment and cleanup phases, prioritize the lightweight tutoring loop improvements first. Keep Anthropic in place until the reply workflow and feedback storage decision are stable, then handle the OpenAI cutover as a separate provider migration.
+After the Render deployment and cleanup phases, stabilize the prompt architecture with live Student Practice examples before changing provider or storage layers. Keep Anthropic in place until prompt routing and feedback storage decisions are stable, then handle the OpenAI cutover as a separate provider migration.
