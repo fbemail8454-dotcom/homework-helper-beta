@@ -3,6 +3,9 @@ let feedbackSelections = { q1: null, q2: null, q3: null };
 let latestOutputId = 'tutorOutput';
 let latestFollowUpAction = '';
 
+const feedbackEmailRecipient = 'fbemail8454@gmail.com';
+const feedbackEmailSubject = 'Homework Helper Feedback';
+
 const followUpActionLabels = {
   'answer-question': 'Answer KidTutor\'s Question',
   'check-answer': 'Check My Answer',
@@ -300,7 +303,7 @@ function saveTutorSession() {
 
 function downloadFeedback() {
   if (feedbackLog.length === 0) {
-    alert('No feedback saved yet.');
+    alert('No submitted feedback yet.');
     return;
   }
 
@@ -314,6 +317,10 @@ function downloadFeedback() {
     content += 'Helpful? ' + entry.q1 + '\n';
     content += 'What would help? ' + entry.q2 + '\n';
     content += 'How it felt: ' + entry.q3 + '\n';
+    content += 'Mode: ' + entry.mode + '\n';
+    content += 'Grade: ' + entry.gradeLevel + '\n';
+    content += 'Subject: ' + entry.subject + '\n';
+    content += 'Follow-up action: ' + entry.followUpAction + '\n';
     if (entry.comment) content += 'Note: ' + entry.comment + '\n';
   });
 
@@ -337,14 +344,14 @@ function selectFeedback(question, value, el) {
   el.classList.add('selected');
 }
 
-function saveFeedback() {
+function submitFeedback() {
   const q1 = feedbackSelections.q1;
   const q2 = feedbackSelections.q2;
   const q3 = feedbackSelections.q3;
   const comment = document.getElementById('feedbackComment').value.trim();
 
-  if (!q1 && !q2 && !q3) {
-    alert('Please answer at least one question before saving.');
+  if (!q1 && !q2 && !q3 && !comment) {
+    alert('Please add a comment or answer at least one question before submitting.');
     return;
   }
 
@@ -352,35 +359,24 @@ function saveFeedback() {
   const entry = {
     timestamp: new Date().toLocaleString(),
     mode: getModeLabel(payload.mode),
-    parentName: payload.parentName,
-    childName: payload.childName,
     gradeLevel: payload.gradeLevel,
     subject: payload.subject,
-    homeworkText: payload.homeworkText,
-    struggleText: payload.struggleText,
-    followUpText: document.getElementById('followUpText').value.trim(),
-    followUpAction: latestFollowUpAction,
-    response: document.getElementById('tutorOutput').value.trim(),
-    followUpResponse: document.getElementById('followUpOutput').value.trim(),
+    followUpAction: latestFollowUpAction || '(none)',
     q1: q1 || '-',
     q2: q2 || '-',
     q3: q3 || '-',
     comment
   };
 
-  feedbackLog.unshift({
-    timestamp: entry.timestamp,
-    q1: entry.q1,
-    q2: entry.q2,
-    q3: entry.q3,
-    comment: entry.comment
-  });
+  feedbackLog.unshift(entry);
 
   renderFeedbackLog();
+  openFeedbackEmail(entry);
 
   fetch('/api/feedback', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
+    keepalive: true,
     body: JSON.stringify(entry)
   }).catch(err => {
     console.warn('Feedback file save failed:', err.message);
@@ -397,6 +393,35 @@ function saveFeedback() {
   document.getElementById('feedbackComment').value = '';
 }
 
+function openFeedbackEmail(entry) {
+  const body = buildFeedbackEmailBody(entry);
+  const mailto = 'mailto:' + feedbackEmailRecipient
+    + '?subject=' + encodeURIComponent(feedbackEmailSubject)
+    + '&body=' + encodeURIComponent(body);
+
+  window.location.href = mailto;
+}
+
+function buildFeedbackEmailBody(entry) {
+  let body = 'Homework Helper Feedback\n\n';
+  body += 'Comment:\n';
+  body += (entry.comment || '(no typed comment)') + '\n\n';
+
+  body += 'Quick ratings:\n';
+  body += 'Helpful: ' + entry.q1 + '\n';
+  body += 'Would help more: ' + entry.q2 + '\n';
+  body += 'Felt: ' + entry.q3 + '\n\n';
+
+  body += 'Context:\n';
+  body += 'Mode: ' + (entry.mode || '(not provided)') + '\n';
+  body += 'Grade: ' + (entry.gradeLevel || '(not provided)') + '\n';
+  body += 'Subject: ' + (entry.subject || '(not provided)') + '\n';
+  body += 'Follow-up action: ' + (entry.followUpAction || '(none)') + '\n';
+  body += 'Submitted: ' + entry.timestamp + '\n';
+
+  return body;
+}
+
 function renderFeedbackLog() {
   const log = document.getElementById('feedbackLog');
   if (feedbackLog.length === 0) {
@@ -410,6 +435,10 @@ function renderFeedbackLog() {
       <div><strong>Helpful?</strong> ${entry.q1}</div>
       <div><strong>What would help?</strong> ${entry.q2}</div>
       <div><strong>How it felt:</strong> ${entry.q3}</div>
+      <div><strong>Mode:</strong> ${entry.mode}</div>
+      <div><strong>Grade:</strong> ${entry.gradeLevel || '(not provided)'}</div>
+      <div><strong>Subject:</strong> ${entry.subject || '(not provided)'}</div>
+      <div><strong>Follow-up action:</strong> ${entry.followUpAction}</div>
       ${entry.comment ? `<div><strong>Note:</strong> ${entry.comment}</div>` : ''}
     </div>
   `).join('');

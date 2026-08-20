@@ -95,7 +95,8 @@ Then test Parent Mode, Student Mode, Curiosity Mode, follow-ups, and feedback fr
 - No cloud storage.
 - No image upload.
 - No Perplexity integration.
-- Feedback is stored locally in `feedback/feedback.json`.
-- On Render, local feedback storage is not a durable production storage plan unless a persistent disk or external datastore is added.
+- Feedback submission opens a prefilled email draft to the project owner for visible friend-beta collection.
+- `Download This Page Feedback` remains available as a fallback.
+- `/api/feedback` still writes a best-effort local server copy to `feedback/feedback.json`, but on Render this is not durable unless a persistent disk or external datastore is added.
 - The app does not verify homework correctness independently beyond the model response.
 - The frontend is intentionally plain HTML, CSS, and JavaScript for this phase.

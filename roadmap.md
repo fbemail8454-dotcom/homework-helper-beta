@@ -18,7 +18,7 @@ Move KidTutor off all nurse-tutor and Anthropic/Claude-era wiring, then standard
 - `render.yaml` now captures the KidTutor Render web service configuration.
 - `server.js` now exposes `/healthz` for Render HTTP health checks.
 - `package.json` defines `npm start` and a lightweight `npm test` prompt-architecture smoke check.
-- Feedback is written to local disk at `feedback/feedback.json`. This is fine for local beta testing, but it is not a durable production storage plan on Render unless a persistent disk or external datastore is added.
+- Feedback submit opens a prefilled email draft for visible friend-beta collection. `/api/feedback` also writes a best-effort local copy to `feedback/feedback.json`, but this is not durable on Render unless a persistent disk or external datastore is added.
 
 ### AI provider setup
 
@@ -32,7 +32,7 @@ Move KidTutor off all nurse-tutor and Anthropic/Claude-era wiring, then standard
 ### Frontend and internal API calls
 
 - `app/script.js:192` calls `/api/tutor`.
-- `app/script.js:381` calls `/api/feedback`.
+- `app/script.js` opens a `mailto:` feedback draft and calls `/api/feedback` as a best-effort fallback.
 - `app/index.html:97-111` provides action-first reply controls for learner replies, answer checking, clearer help, hints, step explanation, alternate examples, and more practice.
 - These frontend calls are relative paths, which is good for Render because the static frontend and Express API can be served from the same origin.
 - Developer Mode and the manual prompt bridge have been removed from the production UI.
@@ -423,7 +423,51 @@ Risk assessment:
 - Token growth risk: Low.
 - Cross-grade risk: Low to Medium, because the change is tested across grade bands.
 
-### Phase 9: Decide feedback storage before production traffic
+### Phase 9: Email Feedback Handoff
+
+Feature name: `Email Feedback Handoff`
+
+Purpose: make beta feedback visible to the owner without relying on Render's temporary local filesystem.
+
+Current issue before this phase:
+
+- The UI says `Save Feedback`.
+- The browser stores a visible in-page feedback log for the current session.
+- The app also posts feedback to `/api/feedback`.
+- `/api/feedback` writes to `feedback/feedback.json` on the running server.
+- On Render, that server file is not visible on the user's computer and is not durable unless persistent storage is added.
+
+Implementation scope:
+
+1. Rename `Save Feedback` to `Submit Feedback`.
+2. Use `fbemail8454@gmail.com` as the feedback recipient.
+3. Use an email subject that includes `Homework Helper`, such as `Homework Helper Feedback`.
+4. Build a concise email body with timestamp, mode, grade, subject, feedback button answers, typed feedback comment, and selected follow-up action when present.
+5. Open a `mailto:` link so the tester can send feedback from their own email app.
+6. Keep the visible in-page feedback log.
+7. Keep `Download This Page Feedback` as a fallback.
+8. Either keep `/api/feedback` as a best-effort local/server fallback or stop presenting it as reliable storage.
+9. Add clear copy that submitting opens the tester's email app.
+10. Keep the tester's typed comment first in the email body and keep metadata secondary.
+
+Acceptance checks:
+
+- Clicking `Submit Feedback` with at least one feedback answer or comment opens a prefilled email to `fbemail8454@gmail.com`.
+- Email subject contains `Homework Helper`.
+- The feedback remains visible in the page after submit.
+- Download feedback still works.
+- No API keys or secrets are involved.
+- If email app does not open, the tester still has copy/download fallback.
+- Existing tutor generation, follow-ups, session save, and `npm test` still pass.
+
+Risk assessment:
+
+- Code risk: Low.
+- Privacy risk: Low to Medium, because feedback email may include homework context if we include too much. Keep the email body concise by default.
+- Browser behavior risk: Medium, because `mailto:` depends on the tester's device/email setup.
+- Storage risk: Low, because this avoids relying on Render local files.
+
+### Phase 10: Decide feedback storage before production traffic
 
 1. For beta-only use, keep local feedback and document that Render instances may not preserve it reliably.
 2. For production, move feedback to a durable store before relying on it.
@@ -432,10 +476,10 @@ Risk assessment:
 
 Acceptance checks:
 
-- Product owner chooses `local beta`, `persistent disk`, or `database`.
+- Product owner chooses `email beta`, `local beta`, `persistent disk`, or `database`.
 - README clearly explains where feedback goes.
 
-### Phase 10: OpenAI migration track
+### Phase 11: OpenAI migration track
 
 Keep this plan ready, but do not block the first Render deployment on it.
 
@@ -452,7 +496,7 @@ Acceptance checks:
 - Error responses do not expose secrets.
 - Follow-up prompts still work through the same endpoint.
 
-### Phase 11: Verification checklist
+### Phase 12: Verification checklist
 
 Run after Render-first implementation:
 
@@ -475,7 +519,8 @@ Run after Render-first implementation:
 - Do we want a separate staging Render service before production?
 - Should prompt routing later extend Parent Guide and Curiosity Mode, or remain Student Practice focused?
 - How much teacher presence is enough before responses feel too long for younger students?
+- Should beta feedback emails include session/homework excerpts, or only concise mode/grade/subject and feedback ratings?
 
 ## Recommended Next Move
 
-After the Render deployment and cleanup phases, collect live Student Practice examples across grade bands before changing provider or storage layers. Keep Anthropic in place until prompt routing, teacher presence, and feedback storage decisions are stable, then handle the OpenAI cutover as a separate provider migration.
+After the Render deployment and cleanup phases, collect live Student Practice examples across grade bands before changing provider or durable storage layers. For friend beta use, prefer `Email Feedback Handoff` before adding a database. Keep Anthropic in place until prompt routing, teacher presence, and feedback collection are stable, then handle the OpenAI cutover as a separate provider migration.

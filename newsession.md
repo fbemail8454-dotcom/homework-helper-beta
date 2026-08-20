@@ -17,7 +17,7 @@ plan before editing.
 - Branch: `main`
 - Origin: `https://github.com/fbemail8454-dotcom/homework-helper-beta.git`
 - Live Render URL: `https://kidtutor-web.onrender.com`
-- Latest pushed commit at handoff: `168872e Tune student practice teacher presence`
+- Latest pushed commit at previous handoff: `31ea9ee Update KidTutor restart handoff`
 - Render service: `kidtutor-web`
 - Render Auto-Deploy should be set to `On Commit`, but recent pushes sometimes
   needed manual deploy. If a future push does not appear in Render, use
@@ -71,6 +71,20 @@ Current Student follow-up workflow:
 - Save section: `Save your work`
 - Session downloads include homework, main response, learner/parent reply,
   follow-up action, and follow-up response.
+
+Current feedback workflow:
+
+- Button label: `Submit Feedback`
+- Recipient: `fbemail8454@gmail.com`
+- Email subject: `Homework Helper Feedback`
+- The tester's typed comment appears first in the email body.
+- Small context metadata follows the comment: mode, grade, subject, follow-up
+  action, and timestamp.
+- Full homework text and AI responses are not included in the feedback email by
+  default.
+- `Download This Page Feedback` remains as a fallback.
+- `/api/feedback` still writes a best-effort local server copy, but the visible
+  beta collection path is email.
 
 ## Prompt / Quality State
 
@@ -176,8 +190,10 @@ awkward response unless a repeatable pattern appears.
 - Do not reuse nurse-tutor Render services, environment groups, or secrets.
 - Do not switch to OpenAI unless the user explicitly starts that migration.
 - Do not overbuild KidTutor; it is a lightweight helper for a few friends.
-- Feedback currently writes to local `feedback/feedback.json`, which is not
-  durable on Render unless a persistent disk or database is added.
+- Feedback submit opens an email draft for visible friend-beta collection.
+  `/api/feedback` still writes a best-effort local server copy to
+  `feedback/feedback.json`, but that file is not durable on Render unless a
+  persistent disk or database is added.
 - If editing, keep changes narrow and run relevant checks.
 - If pushing, user has said push is approved when they explicitly say push, but
   still stage only intended files and keep `CODEX.md` out unless requested.
@@ -187,8 +203,8 @@ awkward response unless a repeatable pattern appears.
 Not urgent unless the user resumes KidTutor work:
 
 1. Feedback Storage Decision
-   - Keep local feedback for beta only, or move to persistent disk/database.
-   - Add basic validation and size limits if production feedback collection
+   - Email handoff is good enough for friend beta.
+   - Move to persistent disk/database only if production feedback collection
      matters.
 2. OpenAI Migration
    - Add OpenAI SDK and `OPENAI_API_KEY` / `OPENAI_MODEL`.
