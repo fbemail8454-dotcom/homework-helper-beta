@@ -23,16 +23,17 @@ Move KidTutor off all nurse-tutor and Anthropic/Claude-era wiring, then standard
 ### AI provider setup
 
 - `server.js:10-11` reads `ANTHROPIC_API_KEY` and `ANTHROPIC_MODEL`.
-- `server.js:382-421` calls `https://api.anthropic.com/v1/messages` directly with Anthropic-specific headers.
-- `server.js:428-435` sends generated tutor prompts to the Anthropic call path through `/api/tutor`.
+- `server.js:399-438` calls `https://api.anthropic.com/v1/messages` directly with Anthropic-specific headers.
+- `server.js:445-452` sends generated tutor prompts to the Anthropic call path through `/api/tutor`.
 - `.env.example` documents only `ANTHROPIC_API_KEY` and `ANTHROPIC_MODEL`.
 - `README.md` documents Anthropic setup and model defaults.
 - `package.json` has no `openai` package dependency.
 
 ### Frontend and internal API calls
 
-- `app/script.js:151` calls `/api/tutor`.
-- `app/script.js:327` calls `/api/feedback`.
+- `app/script.js:158` calls `/api/tutor`.
+- `app/script.js:343` calls `/api/feedback`.
+- `app/index.html:100-109` provides guided follow-up controls for clearer help, hints, answer checking, step explanation, alternate examples, and more practice.
 - These frontend calls are relative paths, which is good for Render because the static frontend and Express API can be served from the same origin.
 - Developer Mode and the manual prompt bridge have been removed from the production UI.
 
@@ -264,7 +265,31 @@ From the deployed Render URL:
 
 For the first deployment, feedback can stay local as beta-only feedback. Before using it for real production collection, choose durable storage such as Render Postgres, another database, or a persistent disk strategy.
 
-### Phase 5: Decide feedback storage before production traffic
+### Phase 5: Guided Follow-Up Upgrade
+
+Feature name: `Guided Follow-Up Upgrade`
+
+1. Add an optional follow-up focus field under "Need another pass?"
+2. Expand follow-up actions to include:
+   - Make it clearer
+   - Give me a hint
+   - Check my answer
+   - Explain this step
+   - Try a different example
+   - More practice
+3. Send `followUpText`, `followUpType`, and `previousAnswer` through the existing `/api/tutor` route.
+4. Update server follow-up instructions so all modes, including Parent Mode, can respond to the second turn.
+5. Require an attempted answer or work note before using "Check my answer."
+6. Preserve the existing `followUpOutput`, download, and feedback behavior.
+
+Acceptance checks:
+
+- Parent Mode, Student Mode, and Curiosity Mode follow-ups still use the same endpoint.
+- "Check my answer" asks for an attempt before sending.
+- Follow-up instructions preserve guided learning and avoid answer dumping.
+- Session downloads and feedback can include the follow-up focus and response.
+
+### Phase 6: Decide feedback storage before production traffic
 
 1. For beta-only use, keep local feedback and document that Render instances may not preserve it reliably.
 2. For production, move feedback to a durable store before relying on it.
@@ -276,7 +301,7 @@ Acceptance checks:
 - Product owner chooses `local beta`, `persistent disk`, or `database`.
 - README clearly explains where feedback goes.
 
-### Phase 6: OpenAI migration track
+### Phase 7: OpenAI migration track
 
 Keep this plan ready, but do not block the first Render deployment on it.
 
@@ -293,7 +318,7 @@ Acceptance checks:
 - Error responses do not expose secrets.
 - Follow-up prompts still work through the same endpoint.
 
-### Phase 7: Verification checklist
+### Phase 8: Verification checklist
 
 Run after Render-first implementation:
 
@@ -316,4 +341,4 @@ Run after Render-first implementation:
 
 ## Recommended Next Move
 
-Implement Phases 1 through 4 first while keeping Anthropic. That gives KidTutor a clean Render deployment path without forcing an AI provider migration at the same time. After the deployed app is stable, handle Phase 6 as the OpenAI cutover.
+After the Render deployment and cleanup phases, prioritize the lightweight tutoring loop improvements first. Keep Anthropic in place until the guided follow-up flow and feedback storage decision are stable, then handle the OpenAI cutover as a separate provider migration.

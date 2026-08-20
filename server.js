@@ -66,7 +66,8 @@ function getTutorRequest(body) {
     homeworkText: normalizeHomeworkText(cleanField(body.homeworkText)),
     struggleText: cleanField(body.struggleText),
     previousAnswer: cleanField(body.previousAnswer),
-    followUpType: cleanField(body.followUpType)
+    followUpType: cleanField(body.followUpType),
+    followUpText: cleanField(body.followUpText)
   };
 
   if (!request.childName) {
@@ -151,6 +152,7 @@ function getToneGuidance(gradeLevel) {
 
 function buildParentGuidePrompt(request) {
   const parentName = request.parentName || 'the parent or helper';
+  const followUp = buildFollowUpInstruction(request);
 
   return `You are Homework Helper, a calm teaching assistant for parents and caregivers.
 
@@ -202,7 +204,8 @@ Rules:
 - For quantum topics, prefer wording such as "A qubit can be in a quantum state connected to both possible outcomes until measured."
 - If using a spinning coin analogy for quantum ideas, call it a rough starter picture, not a perfect model.
 - Explain that quantum computers may handle certain structured problems more efficiently, rather than being faster at everything.
-- Avoid health care, medical, clinical, or college-level professional training framing.`;
+- Avoid health care, medical, clinical, or college-level professional training framing.
+${followUp}`;
 }
 
 function buildKidPracticePrompt(request) {
@@ -359,18 +362,32 @@ function buildFollowUpInstruction(request) {
 
   const instructions = {
     clearer: 'Make the next response clearer and simpler than the previous one.',
-    example: 'Add a concrete example that matches the child\'s grade level and subject.',
+    hint: 'Give one helpful hint that nudges the learner forward without giving away the original homework answer.',
+    'check-answer': 'Check the learner\'s attempted answer or work. Say what looks right, identify the first important mistake if there is one, and guide the next correction step. Do not just give the final answer.',
+    step: 'Explain the specific step the learner is stuck on. If no step is named, choose the most likely confusing step and explain it briefly.',
+    example: 'Try a different concrete example that matches the child\'s grade level and subject. Keep it similar, but do not use the original homework answer as the example.',
     steps: 'Break the help into smaller step-by-step guidance.',
     practice: 'Add more practice while keeping the same mode and grade level.'
   };
+
+  const focus = request.followUpText
+    ? `\n\nWhat the user wants help with now:\n${request.followUpText}`
+    : '';
 
   return `
 
 Previous Homework Helper answer:
 ${request.previousAnswer}
+${focus}
 
 Follow-up request:
-${instructions[request.followUpType] || 'Improve the previous answer based on the helper\'s needs.'}`;
+${instructions[request.followUpType] || 'Improve the previous answer based on the helper\'s needs.'}
+
+Follow-up rules:
+- Keep the same mode, grade level, subject, learner name, and safety boundaries.
+- Respond to the follow-up directly; do not restart the whole session unless needed.
+- Preserve guided learning. Do not turn into an answer-dumping homework solver.
+- If the follow-up asks to check an answer but no attempted answer is provided, ask for the attempted answer or work first.`;
 }
 
 function buildPrompt(request) {

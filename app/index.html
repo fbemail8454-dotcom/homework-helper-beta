@@ -97,10 +97,15 @@
       <h2>Need another pass?</h2>
       <p class="step-note">Ask Homework Helper to adjust the response without starting over.</p>
 
+      <label for="followUpText">What should KidTutor focus on? <span class="optional">(optional)</span></label>
+      <textarea id="followUpText" class="short-textarea" placeholder="Example: I don't get step 2, check my answer, make it shorter"></textarea>
+
       <div class="feedback-grid">
         <button class="feedback-btn" onclick="generateFollowUp('clearer')">Make it clearer</button>
-        <button class="feedback-btn" onclick="generateFollowUp('example')">Add an example</button>
-        <button class="feedback-btn" onclick="generateFollowUp('steps')">Break into steps</button>
+        <button class="feedback-btn" onclick="generateFollowUp('hint')">Give me a hint</button>
+        <button class="feedback-btn" onclick="generateFollowUp('check-answer')">Check my answer</button>
+        <button class="feedback-btn" onclick="generateFollowUp('step')">Explain this step</button>
+        <button class="feedback-btn" onclick="generateFollowUp('example')">Try a different example</button>
         <button class="feedback-btn" onclick="generateFollowUp('practice')">More practice</button>
       </div>
     </section>

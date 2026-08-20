@@ -55,6 +55,7 @@ function toggleCustomSubject() {
 function clearGeneratedOutputs() {
   document.getElementById('tutorOutput').value = '';
   document.getElementById('followUpOutput').value = '';
+  document.getElementById('followUpText').value = '';
   latestOutputId = 'tutorOutput';
   ['tutorOutput', 'followUpOutput'].forEach(id => {
     const btn = document.getElementById('saveBtn_' + id);
@@ -125,13 +126,19 @@ async function generateTutorResponse() {
 async function generateFollowUp(followUpType) {
   const previousAnswer = document.getElementById(latestOutputId).value.trim()
     || document.getElementById('tutorOutput').value.trim();
+  const followUpText = document.getElementById('followUpText').value.trim();
 
   if (!previousAnswer) {
     alert('Generate a Homework Helper response before asking for a follow-up.');
     return;
   }
 
-  const payload = getTutorPayload({ previousAnswer, followUpType });
+  if (followUpType === 'check-answer' && !followUpText) {
+    alert('Type the answer or work you want checked first.');
+    return;
+  }
+
+  const payload = getTutorPayload({ previousAnswer, followUpType, followUpText });
   const error = validateTutorPayload(payload);
   if (error) {
     alert(error);
@@ -217,6 +224,14 @@ function saveTutorSession() {
   content += '=== STRUGGLE NOTES ===\n';
   content += sep + '\n';
   content += (payload.struggleText || '(none)') + '\n';
+
+  const followUpFocus = document.getElementById('followUpText').value.trim();
+  if (followUpFocus) {
+    content += '\n' + sep + '\n';
+    content += '=== FOLLOW-UP FOCUS ===\n';
+    content += sep + '\n';
+    content += followUpFocus + '\n';
+  }
 
   content += '\n' + sep + '\n';
   content += '=== HOMEWORK HELPER RESPONSE ===\n';
@@ -306,6 +321,7 @@ function saveFeedback() {
     subject: payload.subject,
     homeworkText: payload.homeworkText,
     struggleText: payload.struggleText,
+    followUpText: document.getElementById('followUpText').value.trim(),
     response: document.getElementById('tutorOutput').value.trim(),
     followUpResponse: document.getElementById('followUpOutput').value.trim(),
     q1: q1 || '-',
@@ -389,6 +405,7 @@ function resetAllSettings() {
 function clearSessionState() {
   document.getElementById('homeworkText').value = '';
   document.getElementById('struggleText').value = '';
+  document.getElementById('followUpText').value = '';
   clearGeneratedOutputs();
   feedbackLog = [];
   feedbackSelections = { q1: null, q2: null, q3: null };
